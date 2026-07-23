@@ -20,18 +20,18 @@ type ActivityItem = {
 // fixed-size container (scaled from the 107px Figma card to our 98px card) with
 // the artwork absolutely positioned & clipped via overflow-hidden.
 const defaultActivityItems: ActivityItem[] = [
-  { label: "check in", src: "/figmaAssets/home-checkin.png", alt: "Check in", iconBox: "h-[45px] w-[70px]", iconImg: "absolute max-w-none h-[146.79%] w-[142.69%] top-[-21.17%] left-[-19.23%]" },
-  { label: "free play", src: "/figmaAssets/home-freeplay.png", alt: "Free play", iconBox: "h-[50px] w-[77px]", iconImg: "absolute max-w-none h-[145.27%] w-[130.36%] top-[-22.64%] left-[-15.18%]" },
-  { label: "lesson", src: "/figmaAssets/home-lesson.png", alt: "Lesson", iconBox: "h-[52px] w-[60px]", iconImg: "absolute max-w-none h-[192.42%] w-[110.14%] top-[-44.94%] left-[-10.19%]" },
-  { label: "meals", src: "/figmaAssets/home-meals.png", alt: "Meals", iconBox: "h-[51px] w-[66px]", iconImg: "absolute max-w-none h-[136.11%] w-[105.38%] top-[-11.11%] left-0" },
-  { label: "outdoor play", src: "/figmaAssets/home-outdoor.png", alt: "Outdoor play", iconBox: "h-[50px] w-[79px]", iconImg: "absolute max-w-none h-[124.8%] w-[117%] top-[-7.2%] left-[-6%]" },
-  { label: "nap time", src: "/figmaAssets/home-naptime.png", alt: "Nap time", iconBox: "h-[56px] w-[44px]", iconImg: "absolute max-w-none h-[113.21%] w-[145.16%] top-0 left-[-22.58%]" },
-  { label: "sleep check", src: "/figmaAssets/home-sleepcheck.png", alt: "Sleep check", iconBox: "h-[53px] w-[59px]", iconImg: "absolute max-w-none h-[127.25%] w-[170.06%] top-[-6%] left-[-32.56%]" },
-  { label: "potty", src: "/figmaAssets/home-potty.png", alt: "Potty", iconBox: "h-[54px] w-[51px]", iconImg: "absolute max-w-none h-[121.98%] w-[131.33%] top-[-4.95%] left-[-14.67%]" },
-  { label: "incident", src: "/figmaAssets/home-incident.png", alt: "Incident", iconBox: "h-[52px] w-[75px]", iconImg: "absolute max-w-none h-[132.77%] w-[136.99%] top-[-13.45%] left-[-15.32%]" },
-  { label: "wellness", src: "/figmaAssets/home-healthcheck.png", alt: "Wellness", iconBox: "h-[51px] w-[54px]", iconImg: "absolute max-w-none h-[122.91%] w-[116.4%] top-[-4.47%] left-[-5.29%]" },
-  { label: "one on one", src: "/figmaAssets/home-oneonone.png", alt: "One on one", iconBox: "h-[48px] w-[60px]", iconImg: "absolute max-w-none h-[136.45%] w-[161.03%] top-[-14.95%] left-[-25.37%]" },
-  { label: "checkout", src: "/figmaAssets/home-checkout.png", alt: "Checkout", iconBox: "h-[50px] w-[85px]", iconImg: "absolute max-w-none h-[155.88%] w-[139.12%] top-[-20.17%] left-[-19.06%]" },
+  { label: "check in", src: "/figmaAssets/home-checkin.png", alt: "Check in", iconBox: "h-[62px] w-[95px]", iconImg: "absolute max-w-none h-[146.79%] w-[142.69%] top-[-21.17%] left-[-19.23%]" },
+  { label: "free play", src: "/figmaAssets/home-freeplay.png", alt: "Free play", iconBox: "h-[70px] w-[108px]", iconImg: "absolute max-w-none h-[145.27%] w-[130.36%] top-[-22.64%] left-[-15.18%]" },
+  { label: "lesson", src: "/figmaAssets/home-lesson.png", alt: "Lesson", iconBox: "h-[83px] w-[95px]", iconImg: "absolute max-w-none h-[192.42%] w-[110.14%] top-[-44.94%] left-[-10.19%]" },
+  { label: "meals", src: "/figmaAssets/home-meals.png", alt: "Meals", iconBox: "h-[83px] w-[108px]", iconImg: "absolute max-w-none h-[136.11%] w-[105.38%] top-[-11.11%] left-0" },
+  { label: "outdoor play", src: "/figmaAssets/home-outdoor.png", alt: "Outdoor play", iconBox: "h-[69px] w-[108px]", iconImg: "absolute max-w-none h-[124.8%] w-[117%] top-[-7.2%] left-[-6%]" },
+  { label: "nap time", src: "/figmaAssets/home-naptime.png", alt: "Nap time", iconBox: "h-[83px] w-[65px]", iconImg: "absolute max-w-none h-[113.21%] w-[145.16%] top-0 left-[-22.58%]" },
+  { label: "sleep check", src: "/figmaAssets/home-sleepcheck.png", alt: "Sleep check", iconBox: "h-[86px] w-[95px]", iconImg: "absolute max-w-none h-[127.25%] w-[170.06%] top-[-6%] left-[-32.56%]" },
+  { label: "potty", src: "/figmaAssets/home-potty.png", alt: "Potty", iconBox: "h-[83px] w-[79px]", iconImg: "absolute max-w-none h-[121.98%] w-[131.33%] top-[-4.95%] left-[-14.67%]" },
+  { label: "incident", src: "/figmaAssets/home-incident.png", alt: "Incident", iconBox: "h-[75px] w-[108px]", iconImg: "absolute max-w-none h-[132.77%] w-[136.99%] top-[-13.45%] left-[-15.32%]" },
+  { label: "wellness", src: "/figmaAssets/home-healthcheck.png", alt: "Wellness", iconBox: "h-[86px] w-[90px]", iconImg: "absolute max-w-none h-[122.91%] w-[116.4%] top-[-4.47%] left-[-5.29%]" },
+  { label: "one on one", src: "/figmaAssets/home-oneonone.png", alt: "One on one", iconBox: "h-[77px] w-[95px]", iconImg: "absolute max-w-none h-[136.45%] w-[161.03%] top-[-14.95%] left-[-25.37%]" },
+  { label: "checkout", src: "/figmaAssets/home-checkout.png", alt: "Checkout", iconBox: "h-[64px] w-[108px]", iconImg: "absolute max-w-none h-[155.88%] w-[139.12%] top-[-20.17%] left-[-19.06%]" },
 ];
 
 const inputClass =
