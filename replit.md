@@ -8,6 +8,15 @@ A childcare/daycare activity tracking React app with a warm, playful design insp
 - **Backend**: Express.js, Drizzle ORM, PostgreSQL
 - **Styling**: Glass morphism, teal/cream/brown color palette, SF Pro Rounded font
 
+## Deployment
+
+- Hosted on Vercel, deployed from GitHub; no Replit runtime dependency
+- `server/app.ts` — shared Express app factory (`createApp()`, memoized so warm serverless invocations reuse it) used by both entry points below
+- `server/index.ts` — traditional Node entry point: creates the HTTP server, runs the daily cleanup interval, serves the Vite dev server or the static build, listens on `PORT`
+- `api/index.ts` — Vercel serverless entry point: wraps the same Express app for `vercel.json`'s catch-all `/api` rewrite
+- `vercel.json` — build/output config, `/api` + SPA rewrites, and the `/api/cron/cleanup` schedule (replaces the traditional path's `setInterval` cleanup job on Vercel)
+- Client build output: `dist/public` (via `vite build`)
+
 ## Database
 
 - PostgreSQL via Drizzle ORM
@@ -56,27 +65,26 @@ A childcare/daycare activity tracking React app with a warm, playful design insp
 - `POST /api/likes/toggle` — Toggle like for an activity (activityId, role)
 - `POST /api/summarize-day` — AI day summary generation
 - `GET /api/teachers` — List all teachers
-- `POST /api/teachers` — Create a teacher (Zod validated via `insertTeacherSchema`; broadcasts `teachers` SSE event)
+- `POST /api/teachers` — Create a teacher (Zod validated via `insertTeacherSchema`)
+- `GET /api/cron/cleanup` — Scheduled cleanup of expired invitations/password resets; invoked by Vercel Cron (`vercel.json`), gated by `CRON_SECRET` in production
 
 ## Security
 
 - Session auth (scrypt-hashed passwords, timing-safe compare); roles enforced server-side on every route
-- Parent isolation: parents only see/access their own children (404 on foreign data); SSE filtered per parent
-- Rate limits: login, admin register, forgot/reset password, invitation accept (20/15min per IP); AI endpoints rate-limited + concurrency-capped; SSE connection caps
+- Parent isolation: parents only see/access their own children (404 on foreign data), enforced on every API request
+- Rate limits: login, admin register, forgot/reset password, invitation accept (20/15min per IP); AI endpoints rate-limited + concurrency-capped. Buckets are in-memory (`Map`), so limits are per-instance, not shared across concurrent Vercel invocations
 - `POST /api/admin/register` gated in production by `ADMIN_SETUP_TOKEN` (constant-time compare; token passed via onboarding link `?setup=...`); route also closed once an admin exists
 - `SESSION_SECRET` required in production (server refuses to start without it)
 - Admin onboarding credentials held in memory only (`client/src/lib/onboardingCredentials.ts`), never in sessionStorage
 - Email HTML variables escaped (`escapeHtml` in `server/email.ts`); PII masked in server logs
-- Security headers: nosniff, Referrer-Policy, Permissions-Policy (X-Frame-Options omitted for workspace iframe previews)
+- Security headers: nosniff, Referrer-Policy, Permissions-Policy (X-Frame-Options intentionally omitted — a carryover from Replit's iframe-embedded preview; worth reconsidering now that the app is deployed standalone)
 
 ## Real-Time Sync
 
-- Server-Sent Events (SSE) via `GET /api/events` for push updates
-- Server module: `server/sse.ts` — manages client connections, heartbeat (25s), and broadcast
-- Client hook: `client/src/lib/useRealtimeSync.ts` — connects to SSE, invalidates React Query caches
-- Events: `activities` (childIds, action), `comments` (activityId, action), `likes` (activityId, action), `children` (childId, action), `teachers` (action)
-- Auto-reconnect on disconnect (3s delay)
-- Both teacher and parent devices connect to the same published backend
+- Client-side polling every 5s — no persistent connection, since Vercel's serverless functions can't hold long-lived SSE streams or in-memory client lists
+- Client hook: `client/src/lib/useRealtimeSync.ts` — invalidates all React Query caches on each tick; skips the tick while the tab is hidden and invalidates immediately on regaining focus (`document.visibilitychange`)
+- Both teacher and parent devices poll the same deployed backend
+- Trade-off: a poll tick carries no per-event metadata, so the previous cross-device toasts (e.g. "A parent left a comment...") are gone — devices just refetch and re-render silently
 
 ## Responsive Layout
 
@@ -105,8 +113,8 @@ Activity icons (generated from the "icon discription" field in the new-activity 
 - Objects are chunky, toy-like, geometric, slightly imperfect
 - Warm, simple, cheerful, uncluttered; avoid realism, sharp vector art, gradients, text, logos, detailed backgrounds
 - The exact generation prompt lives in `server/routes.ts` (the `prompt` in the `/api/generate-activity-image` route); the user's icon-description text is injected as the subject
-- Generating a new icon first **deletes all previous `.png` files** in `client/public/generatedAssets/` (only the latest generated icon is kept on disk)
-- White margins are auto-trimmed via ImageMagick `-trim` so the figure fills the frame
+- Generated images are returned directly as a base64 data URL in the API response — nothing is written to disk (required for Vercel's ephemeral serverless filesystem)
+- White margins are auto-trimmed via `sharp`'s `.trim()` so the figure fills the frame
 
 ## Shared Components
 

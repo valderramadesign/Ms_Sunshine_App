@@ -1,13 +1,9 @@
 import type { Express, Request, Response, NextFunction } from "express";
-import type { Server } from "http";
 import { storage, hashPassword, verifyPassword } from "./storage";
 import { insertTeacherSchema } from "@shared/schema";
 import { z } from "zod";
-import fs from "fs";
-import path from "path";
-import { execFileSync } from "child_process";
+import sharp from "sharp";
 import { randomBytes, timingSafeEqual } from "crypto";
-import { handleSSEConnection, broadcast, configureSSE } from "./sse";
 import { sendInvitationEmail, sendPasswordResetEmail } from "./email";
 
 type Role = "admin" | "teacher" | "parent";
@@ -240,11 +236,12 @@ async function maybeCreateInvite(
 // Trim uniform border margins (white on the opaque watercolor icons) so the
 // generated subject fills the frame, matching the tightly-cropped default
 // activity icons on the home page.
-function trimImageMargins(filePath: string): void {
+async function trimImageMargins(buffer: Buffer): Promise<Buffer> {
   try {
-    execFileSync("magick", [filePath, "-fuzz", "8%", "-trim", "+repage", filePath]);
+    return await sharp(buffer).trim({ threshold: 20 }).toBuffer();
   } catch (e) {
     console.error("Image trim failed (using untrimmed image):", e);
+    return buffer;
   }
 }
 
@@ -267,13 +264,7 @@ const updateChildSchema = z.object({
   note: z.string().optional().default(""),
 });
 
-export async function registerRoutes(
-  httpServer: Server,
-  app: Express
-): Promise<Server> {
-
-  // Wire up SSE with live parent-child access resolver
-  configureSSE((email) => storage.getParentChildIds(email));
+export async function registerRoutes(app: Express): Promise<void> {
 
   // POST /api/generate-activity-image
   // Generates a watercolor illustration using the subject from the description field
@@ -295,29 +286,11 @@ export async function registerRoutes(
         return res.status(400).json({ error: "subject must be 300 characters or fewer" });
       }
 
-      const baseUrl = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
-      const apiKey  = process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
+      const baseUrl = process.env.OPENAI_BASE_URL || "https://api.openai.com/v1";
+      const apiKey  = process.env.OPENAI_API_KEY;
 
-      if (!baseUrl || !apiKey) {
+      if (!apiKey) {
         return res.status(500).json({ error: "AI integration not configured" });
-      }
-
-      // Delete all old generated icons before creating a new one.
-      const generatedDir = path.join(process.cwd(), "client", "public", "generatedAssets");
-      try {
-        if (fs.existsSync(generatedDir)) {
-          for (const file of fs.readdirSync(generatedDir)) {
-            if (file.startsWith("activity-") && file.toLowerCase().endsWith(".png")) {
-              try {
-                fs.unlinkSync(path.join(generatedDir, file));
-              } catch (e) {
-                console.error(`Failed to delete old icon ${file}:`, e);
-              }
-            }
-          }
-        }
-      } catch (e) {
-        console.error("Failed to clear old generated icons:", e);
       }
 
       const prompt =
@@ -341,7 +314,7 @@ export async function registerRoutes(
         "no off-white, cream, paper tint, vignette, or background shadow behind the figures.";
 
       const imageAbort = new AbortController();
-      const imageTimeout = setTimeout(() => imageAbort.abort(), 60_000);
+      const imageTimeout = setTimeout(() => imageAbort.abort(), 55_000);
 
       let apiResponse: globalThis.Response;
       try {
@@ -379,27 +352,18 @@ export async function registerRoutes(
         return res.status(500).json({ error: "No image returned from API" });
       }
 
-      // Save to public/generatedAssets with a unique filename
-      const filename = `activity-${Date.now()}.png`;
-      const publicDir = path.join(process.cwd(), "client", "public", "generatedAssets");
-      fs.mkdirSync(publicDir, { recursive: true });
-      const filePath  = path.join(publicDir, filename);
-
+      let buffer: Buffer;
       if (imageData.b64_json) {
-        const buffer = Buffer.from(imageData.b64_json, "base64");
-        fs.writeFileSync(filePath, buffer);
-        trimImageMargins(filePath);
-        return res.json({ imagePath: `/generatedAssets/${filename}` });
+        buffer = Buffer.from(imageData.b64_json, "base64");
       } else if (imageData.url) {
-        // Fetch from URL and save
         const imgRes = await fetch(imageData.url);
-        const imgBuf = Buffer.from(await imgRes.arrayBuffer());
-        fs.writeFileSync(filePath, imgBuf);
-        trimImageMargins(filePath);
-        return res.json({ imagePath: `/generatedAssets/${filename}` });
+        buffer = Buffer.from(await imgRes.arrayBuffer());
+      } else {
+        return res.status(500).json({ error: "No image data in response" });
       }
 
-      return res.status(500).json({ error: "No image data in response" });
+      const trimmed = await trimImageMargins(buffer);
+      return res.json({ image: `data:image/png;base64,${trimmed.toString("base64")}` });
     } catch (err: unknown) {
       if (err instanceof Error && err.name === "AbortError") {
         return res.status(504).json({ error: "Image generation timed out" });
@@ -443,10 +407,10 @@ export async function registerRoutes(
         }
       }
 
-      const baseUrl = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
-      const apiKey = process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
+      const baseUrl = process.env.OPENAI_BASE_URL || "https://api.openai.com/v1";
+      const apiKey = process.env.OPENAI_API_KEY;
 
-      if (!baseUrl || !apiKey) {
+      if (!apiKey) {
         return res.status(500).json({ error: "AI integration not configured" });
       }
 
@@ -503,10 +467,6 @@ export async function registerRoutes(
     } finally {
       aiInflight--;
     }
-  });
-
-  app.get("/api/events", requireAuth, (req: Request, res: Response) => {
-    handleSSEConnection(req, res);
   });
 
   app.get("/api/children", requireAuth, async (req: Request, res: Response) => {
@@ -567,7 +527,6 @@ export async function registerRoutes(
         results.push(activity);
       }
       res.json(results);
-      for (const cId of childIds) void broadcast("activities", { childIds, action: "created" }, cId);
     } catch (err) {
       console.error("Error creating activity:", err);
       res.status(500).json({ error: "Internal server error" });
@@ -582,7 +541,6 @@ export async function registerRoutes(
       }
       const updated = await storage.updateActivityText(req.params.id as string, text);
       res.json(updated);
-      void broadcast("activities", { childIds: [updated.childId], action: "updated" }, updated.childId);
     } catch (err) {
       console.error("Error updating activity text:", err);
       res.status(500).json({ error: "Internal server error" });
@@ -597,7 +555,6 @@ export async function registerRoutes(
       }
       const updated = await storage.updateActivityNote(req.params.id as string, note);
       res.json(updated);
-      void broadcast("activities", { childIds: [updated.childId], action: "updated" }, updated.childId);
     } catch (err) {
       console.error("Error updating activity note:", err);
       res.status(500).json({ error: "Internal server error" });
@@ -612,7 +569,6 @@ export async function registerRoutes(
       }
       const updated = await storage.updateActivityTime(req.params.id as string, time);
       res.json(updated);
-      void broadcast("activities", { childIds: [updated.childId], action: "updated" }, updated.childId);
     } catch (err) {
       console.error("Error updating activity time:", err);
       res.status(500).json({ error: "Internal server error" });
@@ -627,7 +583,6 @@ export async function registerRoutes(
       }
       const updated = await storage.updateActivityPhoto(req.params.id as string, photo);
       res.json(updated);
-      void broadcast("activities", { childIds: [updated.childId], action: "updated" }, updated.childId);
     } catch (err) {
       console.error("Error updating activity photo:", err);
       res.status(500).json({ error: "Internal server error" });
@@ -636,10 +591,8 @@ export async function registerRoutes(
 
   app.delete("/api/activities/:id", requireStaff, async (req: Request, res: Response) => {
     try {
-      const activity = await storage.getActivity(req.params.id as string);
       await storage.deleteActivity(req.params.id as string);
       res.json({ success: true });
-      if (activity) void broadcast("activities", { childIds: [activity.childId], action: "deleted" }, activity.childId);
     } catch (err) {
       console.error("Error deleting activity:", err);
       res.status(500).json({ error: "Internal server error" });
@@ -672,9 +625,6 @@ export async function registerRoutes(
       const commentRole = feedRole(req);
       const comment = await storage.createComment({ activityId, text, time, role: commentRole, accountId: feedActorId(req) });
       res.json(comment);
-      const activity = await storage.getActivity(activityId);
-      const child = activity ? await storage.getChild(activity.childId) : undefined;
-      void broadcast("comments", { activityId, childId: activity?.childId, action: "created", role: commentRole, childName: child?.firstName || "" }, activity?.childId);
     } catch (err) {
       console.error("Error creating comment:", err);
       res.status(500).json({ error: "Internal server error" });
@@ -692,8 +642,6 @@ export async function registerRoutes(
       }
       const comment = await storage.updateComment(req.params.id as string, text);
       res.json(comment);
-      const updatedActivity = await storage.getActivity(comment.activityId);
-      void broadcast("comments", { activityId: comment.activityId, childId: updatedActivity?.childId, action: "updated" }, updatedActivity?.childId);
     } catch (err) {
       console.error("Error updating comment:", err);
       res.status(500).json({ error: "Internal server error" });
@@ -709,10 +657,6 @@ export async function registerRoutes(
       }
       await storage.deleteComment(req.params.id as string);
       res.json({ success: true });
-      if (commentToDelete) {
-        const delActivity = await storage.getActivity(commentToDelete.activityId);
-        void broadcast("comments", { activityId: commentToDelete.activityId, childId: delActivity?.childId, action: "deleted" }, delActivity?.childId);
-      }
     } catch (err) {
       console.error("Error deleting comment:", err);
       res.status(500).json({ error: "Internal server error" });
@@ -750,13 +694,6 @@ export async function registerRoutes(
       const likeRole = feedRole(req);
       const liked = await storage.toggleLike(activityId, likeRole, feedActorId(req));
       res.json({ liked });
-      const likeActivity = await storage.getActivity(activityId);
-      const likeChild = likeActivity ? await storage.getChild(likeActivity.childId) : undefined;
-      if (liked) {
-        void broadcast("likes", { activityId, childId: likeActivity?.childId, action: "liked", role: likeRole, childName: likeChild?.firstName || "" }, likeActivity?.childId);
-      } else {
-        void broadcast("likes", { activityId, childId: likeActivity?.childId, action: "unliked", role: likeRole }, likeActivity?.childId);
-      }
     } catch (err) {
       console.error("Error toggling like:", err);
       res.status(500).json({ error: "Internal server error" });
@@ -787,7 +724,6 @@ export async function registerRoutes(
         note: note || "",
       });
       res.json(childData);
-      void broadcast("children", { childId: req.params.id, action: "updated" }, String(req.params.id));
 
       // Invite every guardian with an email who doesn't yet have an account.
       // Fire-and-forget so email latency/failures never affect the response.
@@ -821,7 +757,6 @@ export async function registerRoutes(
       if (!existing) return res.status(404).json({ error: "Child not found" });
       await storage.deleteChild(req.params.id as string);
       res.json({ success: true });
-      void broadcast("children", { childId: req.params.id, action: "deleted" }, String(req.params.id));
     } catch (err) {
       console.error("Error deleting child:", err);
       res.status(500).json({ error: "Internal server error" });
@@ -897,14 +832,12 @@ export async function registerRoutes(
         });
         if (!updated) return res.status(404).json({ error: "Teacher not found" });
         res.json(buildOwnerTeacher(updated));
-        void broadcast("teachers", { action: "updated" });
         return;
       }
       const existing = await storage.getTeacher(req.params.id as string);
       if (!existing) return res.status(404).json({ error: "Teacher not found" });
       const teacher = await storage.updateTeacher(req.params.id as string, parsed.data);
       res.json(teacher);
-      void broadcast("teachers", { action: "updated" });
     } catch (err) {
       console.error("Error updating teacher:", err);
       res.status(500).json({ error: "Internal server error" });
@@ -921,7 +854,6 @@ export async function registerRoutes(
       if (!existing) return res.status(404).json({ error: "Teacher not found" });
       await storage.deleteTeacher(req.params.id as string);
       res.json({ success: true });
-      void broadcast("teachers", { action: "deleted" });
     } catch (err) {
       console.error("Error deleting teacher:", err);
       res.status(500).json({ error: "Internal server error" });
@@ -937,7 +869,6 @@ export async function registerRoutes(
       }
       const teacher = await storage.createTeacher(parsed.data);
       res.json(teacher);
-      void broadcast("teachers", { action: "created" });
 
       // Invite the new teacher to set up their login (best-effort).
       void (async () => {
@@ -1261,5 +1192,31 @@ export async function registerRoutes(
   app.post("/api/logout", logoutHandler);
   app.post("/api/admin/logout", logoutHandler);
 
-  return httpServer;
+  // GET /api/cron/cleanup — scheduled cleanup of expired invitations/password
+  // resets. Replaces the traditional hosting path's setInterval for Vercel's
+  // serverless model (see vercel.json's `crons` entry). Gated by CRON_SECRET
+  // in production so only Vercel's cron invoker (or an operator) can trigger it.
+  app.get("/api/cron/cleanup", async (req: Request, res: Response) => {
+    if (process.env.NODE_ENV === "production") {
+      const expected = process.env.CRON_SECRET || "";
+      if (!expected) {
+        return res.status(403).json({ error: "Cron endpoint is disabled. Set CRON_SECRET to enable it." });
+      }
+      const provided = (req.headers.authorization || "").replace(/^Bearer\s+/i, "");
+      const a = Buffer.from(provided);
+      const b = Buffer.from(expected);
+      const match = a.length === b.length && timingSafeEqual(a, b);
+      if (!match) {
+        return res.status(403).json({ error: "Invalid cron secret" });
+      }
+    }
+    try {
+      await storage.deleteExpiredInvitations();
+      await storage.deleteExpiredPasswordResets();
+      res.json({ success: true });
+    } catch (err) {
+      console.error("Error running cron cleanup:", err);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
 }

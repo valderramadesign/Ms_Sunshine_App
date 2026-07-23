@@ -1,14 +1,10 @@
-// Invitation email delivery via Resend.
-//
-// Uses @replit/connectors-sdk to proxy requests through the Replit Resend connector.
-// Falls back to RESEND_API_KEY + RESEND_FROM_EMAIL env vars if the connector is unavailable.
+// Invitation email delivery via the Resend API, using RESEND_API_KEY +
+// RESEND_FROM_EMAIL env vars.
 //
 // Email is best-effort: if Resend is not configured or the send fails, the
 // invitation is still persisted and the accept link is logged so it can be
 // shared manually. Callers must never let a failed email abort the operation
 // that triggered it (e.g. creating a child or teacher).
-
-import { ReplitConnectors } from "@replit/connectors-sdk";
 
 // Escape user-provided values before interpolating them into email HTML so a
 // crafted school name or inviter name cannot inject markup into the message.
@@ -67,30 +63,6 @@ export async function sendPasswordResetEmail(opts: {
   const html = resetHtml({ resetUrl, schoolName });
   const fromName = schoolName || "Miss Sunshine";
 
-  // Try Resend via connector SDK first
-  try {
-    const connectors = new ReplitConnectors();
-    const res = await connectors.proxy("resend", "/emails", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        from: fromEmail ? `${fromName} <${fromEmail}>` : `${fromName} <onboarding@resend.dev>`,
-        to: [to],
-        subject,
-        html,
-      }),
-    });
-    if (res.ok) {
-      console.log(`[email] Password reset sent via Resend connector to ${to}`);
-      return true;
-    }
-    const detail = await res.text().catch(() => "");
-    console.warn(`[email] Resend connector reset send failed (${res.status}) for ${to}: ${detail}. Reset link: ${resetUrl}`);
-  } catch (err) {
-    console.warn(`[email] Resend connector unavailable for reset:`, err);
-  }
-
-  // Fallback: direct Resend API with env var key
   const apiKey = process.env.RESEND_API_KEY || "";
   if (!apiKey) {
     console.warn(
@@ -140,32 +112,6 @@ export async function sendInvitationEmail(opts: {
   const html = inviteHtml({ role, inviteUrl, invitedByName, schoolName });
   const fromName = schoolName || "Miss Sunshine";
 
-  // Try Resend via connector SDK first
-  try {
-    const connectors = new ReplitConnectors();
-    const res = await connectors.proxy("resend", "/emails", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        from: fromEmail ? `${fromName} <${fromEmail}>` : `${fromName} <onboarding@resend.dev>`,
-        to: [to],
-        subject,
-        html,
-      }),
-    });
-    if (res.ok) {
-      console.log(`[email] Invitation sent via Resend connector to ${to}`);
-      return true;
-    }
-    const detail = await res.text().catch(() => "");
-    console.warn(`[email] Resend connector send failed (${res.status}) for ${to}: ${detail}. Accept link: ${inviteUrl}`);
-    // Fall through to API key fallback
-  } catch (err) {
-    console.warn(`[email] Resend connector unavailable:`, err);
-    // Fall through to API key fallback
-  }
-
-  // Fallback: direct Resend API with env var key
   const apiKey = process.env.RESEND_API_KEY || "";
   if (!apiKey) {
     console.warn(

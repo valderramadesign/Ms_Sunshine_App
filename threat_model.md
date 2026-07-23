@@ -22,18 +22,18 @@ Miss Sunshine is a public-facing React + Express childcare activity tracking app
 - **API to external AI provider** — `/api/generate-activity-image` and `/api/summarize-day` send data from the app to an OpenAI-compatible endpoint using server-held credentials.
 - **Public vs authenticated users** — the deployment is public, so any control that only exists in client routing, localStorage, or hidden UI is not a real boundary.
 - **Owner/admin vs teacher vs parent** — role distinctions shown in the UI must be enforced by the backend; client-selected roles are attacker-controlled input.
-- **Development-only vs production** — Vite/dev-server behavior is out of scope in production; the production scan should focus on `server/index.ts`, `server/routes.ts`, `server/sse.ts`, `server/storage.ts`, and the browser code that drives those APIs.
+- **Development-only vs production** — Vite/dev-server behavior is out of scope in production; the production scan should focus on `server/app.ts` (shared Express app factory), `server/routes.ts`, `server/storage.ts`, the two production entry points (`server/index.ts` for traditional Node hosting, `api/index.ts` for Vercel serverless), and the browser code that drives those APIs.
 
 ## Scan Anchors
 
-- Production entry point: `server/index.ts`.
-- Highest-risk code: `server/routes.ts` and `server/sse.ts` because they define externally reachable data access, mutation paths, and recovery flows.
+- Production entry points: `server/index.ts` (traditional Node hosting) and `api/index.ts` (Vercel serverless function); both build the app via the shared `server/app.ts` factory, so that file is in scope for either deployment target.
+- Highest-risk code: `server/routes.ts` (externally reachable data access, mutation paths, and recovery flows) and `server/app.ts` (session configuration, security headers, and auth middleware shared by both entry points).
 - Sensitive data model: `shared/schema.ts` (`children`, `teachers`, `admin_account`, `accounts`, `invitations`, `password_resets`, `activities`, `feed_comments`, `feed_likes`).
-- Public auth surfaces: `/api/login`, `/api/admin/login`, `/api/auth/forgot-password`, `/api/auth/reset-password/:token`, `/api/invitations/:token`, `/api/invitations/:token/accept`, `/api/admin/register`, and `/api/events`.
+- Public auth surfaces: `/api/login`, `/api/admin/login`, `/api/auth/forgot-password`, `/api/auth/reset-password/:token`, `/api/invitations/:token`, `/api/invitations/:token/accept`, `/api/admin/register`, and `/api/cron/cleanup` (unauthenticated by design in dev; gated by a constant-time `CRON_SECRET` check in production).
 - `getBaseUrl()` in `server/routes.ts` is security-sensitive because it feeds password-reset and invitation email links.
 - Feed comments/likes should be checked for per-account actor binding, not just coarse `parent`/`teacher` role checks.
 - Client-side role handling in `client/src/lib/roleStore.ts` is not a security control and should never be treated as authorization.
-- `server/replit_integrations/` appears non-owning for the main app unless future scans find route registration from `server/index.ts`.
+- Rate limiting (`aiRateBuckets`, `loginRateBuckets` in `server/routes.ts`) is an in-memory `Map`, scoped to a single process. On Vercel this is per-instance, not global — concurrent cold starts or multiple warm instances each get their own quota, weakening the effective brute-force/abuse ceiling versus a single long-lived process.
 
 ## Threat Categories
 
@@ -47,11 +47,11 @@ Untrusted clients can create, edit, and delete child records, activities, commen
 
 ### Information Disclosure
 
-The application stores highly sensitive personal information about children, guardians, and staff. API responses and SSE events must only disclose data to authorized users with a need to know, and responses should be scoped to the relevant child or staff relationship. Recovery and onboarding emails must not disclose valid tokens to attacker-controlled domains through untrusted host-derived link generation.
+The application stores highly sensitive personal information about children, guardians, and staff. API responses must only disclose data to authorized users with a need to know, and responses should be scoped to the relevant child or staff relationship. Recovery and onboarding emails must not disclose valid tokens to attacker-controlled domains through untrusted host-derived link generation.
 
 ### Denial of Service
 
-Public endpoints can be abused to create excessive writes, open many SSE connections, or trigger repeated AI-backed requests. The system should prevent unauthenticated abuse of expensive or state-changing operations and avoid allowing arbitrary internet clients to consume persistent server resources. Authentication endpoints also need abuse controls so attackers cannot run unlimited online guessing campaigns.
+Public endpoints can be abused to create excessive writes or trigger repeated AI-backed requests. The system should prevent unauthenticated abuse of expensive or state-changing operations and avoid allowing arbitrary internet clients to consume persistent server resources. Authentication endpoints also need abuse controls so attackers cannot run unlimited online guessing campaigns. On Vercel, in-memory rate-limit buckets are scoped per serverless instance rather than globally (see Scan Anchors), so the effective abuse ceiling across concurrent instances is higher than the configured per-IP limits suggest.
 
 ### Elevation of Privilege
 

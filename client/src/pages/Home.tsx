@@ -105,7 +105,7 @@ export const Home = (): JSX.Element => {
       });
       if (res.ok) {
         const data = await res.json();
-        imageSrc = data.imagePath;
+        imageSrc = data.image;
       }
     } catch (e) {
       console.error("Image generation failed:", e);
