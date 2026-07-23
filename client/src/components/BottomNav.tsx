@@ -1,5 +1,4 @@
 import { useLocation } from "wouter";
-import { useAuth } from "@/lib/auth";
 
 type BottomNavProps = {
   active: "activities" | "school";
@@ -7,8 +6,6 @@ type BottomNavProps = {
 
 export default function BottomNav({ active }: BottomNavProps) {
   const [, setLocation] = useLocation();
-  const { role } = useAuth();
-  const showSchoolTab = role !== "teacher";
 
   return (
     <div
@@ -52,8 +49,8 @@ export default function BottomNav({ active }: BottomNavProps) {
           </p>
         </button>
 
-        {/* School tab — hidden for teachers who have no school management view */}
-        {showSchoolTab && <button
+        {/* School tab */}
+        <button
           data-testid="nav-school"
           className="flex flex-col items-center gap-[6px] bg-transparent border-none cursor-pointer p-0 shrink-0"
           onClick={() => setLocation("/school")}
@@ -80,7 +77,7 @@ export default function BottomNav({ active }: BottomNavProps) {
           <p className={`[font-family:'SF_Pro_Rounded-Semibold','M_PLUS_Rounded_1c',Helvetica] font-semibold text-[14px] text-center leading-[normal] tracking-[0] shrink-0 m-0 ${active === "school" ? "text-[#41444b]" : "text-[#3e983a]"}`}>
             school
           </p>
-        </button>}
+        </button>
 
       </div>
     </div>

@@ -9,7 +9,6 @@ import docIcon from "@assets/Document_1774560438127.png";
 import photoFrameImg from "@assets/PhotoFrame_1780975215901.png";
 import { useIsMobile, useKeyboardToolbarPosition } from "@/hooks/use-keyboard";
 import { useSchoolLogo } from "@/lib/useSchoolLogo";
-import { useAuth } from "@/lib/auth";
 
 const FONT = "[font-family:'SF_Pro_Rounded-Semibold','M_PLUS_Rounded_1c',Helvetica]";
 const ERROR_BORDER = "border-[#b34d3b]";
@@ -76,8 +75,6 @@ export const ChildDetails = (): JSX.Element => {
   const [, setLocation] = useLocation();
   const params = useParams<{ childId: string }>();
   const logoSrc = useSchoolLogo();
-  const { role } = useAuth();
-  const isReadOnly = role === "teacher";
   const isMobile = useIsMobile();
   const { bottom, keyboardOpen } = useKeyboardToolbarPosition();
   const docInputRef = useRef<HTMLInputElement>(null);
@@ -251,9 +248,8 @@ export const ChildDetails = (): JSX.Element => {
     <div className="flex flex-col gap-[6px] w-full">
       <label className={labelClass}>{label}</label>
       <input data-testid={testId} type={type} placeholder={placeholder} value={value}
-        readOnly={isReadOnly}
-        onChange={(e) => { if (!isReadOnly) { onChange(e.target.value); setDirty(true); } }}
-        className={`${inputClass(required && isMandatoryEmpty(value))}${isReadOnly ? " opacity-70 cursor-default" : ""}`} />
+        onChange={(e) => { onChange(e.target.value); setDirty(true); }}
+        className={inputClass(required && isMandatoryEmpty(value))} />
     </div>
   );
 
@@ -479,8 +475,7 @@ export const ChildDetails = (): JSX.Element => {
         </div>
       </div>
 
-      {/* Bottom CTA — hidden in read-only (teacher) mode */}
-      {!isReadOnly && isMobile ? (
+      {isMobile ? (
         <div className="fixed left-0 right-0 z-50 flex items-center justify-between px-[16px] bg-[#f0efe9] border-t border-[#d9d3c7]"
           style={{ bottom, height: 44, transition: keyboardOpen ? "bottom 0.1s ease-out" : "none" }}>
           <button data-testid="btn-graduate-details"
@@ -491,7 +486,7 @@ export const ChildDetails = (): JSX.Element => {
             style={{ background: "linear-gradient(135deg, #5CD1E6 0%, #42ACBF 50%, #288899 100%)" }}
             onClick={handleSubmit}>Save changes</button>
         </div>
-      ) : (!isReadOnly ? (
+      ) : (
         <div className="absolute bottom-0 left-0 right-0 h-[134px] z-10 pointer-events-auto">
           <BottomCTA>
             <button data-testid="btn-save-details"
@@ -506,7 +501,7 @@ export const ChildDetails = (): JSX.Element => {
               onClick={() => setShowConfirm(true)}>graduate</button>
           </BottomCTA>
         </div>
-      ) : null)}
+      )}
 
       <ConfirmRemoveDialog
         open={showConfirm}

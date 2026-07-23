@@ -12,26 +12,26 @@ A childcare/daycare activity tracking React app with a warm, playful design insp
 
 - Hosted on Vercel, deployed from GitHub; no Replit runtime dependency
 - `server/app.ts` — shared Express app factory (`createApp()`, memoized so warm serverless invocations reuse it) used by both entry points below
-- `server/index.ts` — traditional Node entry point: creates the HTTP server, runs the daily cleanup interval, serves the Vite dev server or the static build, listens on `PORT`
+- `server/index.ts` — traditional Node entry point: creates the HTTP server, serves the Vite dev server or the static build, listens on `PORT`
 - `api/index.ts` — Vercel serverless entry point: wraps the same Express app for `vercel.json`'s catch-all `/api` rewrite
-- `vercel.json` — build/output config, `/api` + SPA rewrites, and the `/api/cron/cleanup` schedule (replaces the traditional path's `setInterval` cleanup job on Vercel)
+- `vercel.json` — build/output config and `/api` + SPA rewrites
 - Client build output: `dist/public` (via `vite build`)
 
 ## Database
 
 - PostgreSQL via Drizzle ORM
-- Tables: `children`, `activities`, `feed_comments`, `feed_likes`, `teachers`, `admin_account`, `accounts`, `invitations`, `password_resets`, `session`
+- Tables: `children`, `activities`, `feed_comments`, `feed_likes`, `teachers`
 - `teachers` table stores: id, first_name, last_name, photo, relation, phone, email, address
 - Children table stores: id, first_name, last_name, photo, birthday, guardians (JSON string with name/relation/contact/email), enrollment_date, graduation_date, address, allergies, medications, doctor, doctor_phone, note
 - Activities table stores: id, child_id, text, time, note, photo, created_at
-- feed_comments table stores: id, activity_id, text, time, role (parent/teacher), created_at
-- feed_likes table stores: id, activity_id, role (parent/teacher), created_at
-- No seed data: the app starts empty and all people/activities are created through the UI (admin onboarding → add children/teachers/guardians)
+- feed_comments table stores: id, activity_id, text, time, role (always `"teacher"`), account_id (repurposed to hold an anonymous per-device UUID, used for authorship display only — not tied to any login), created_at
+- feed_likes table stores: id, activity_id, role (always `"teacher"`), account_id (repurposed to hold an anonymous per-device UUID, used for "mine" like-state only — not tied to any login), created_at
+- No seed data: the app starts empty and all people/activities are created through the UI (add children/teachers/guardians directly — there is no onboarding flow)
 - Deleting an activity cascades to remove its comments and likes
 
 ## Key Routes
 
-- `/` — Admin login; redirects to `/onboarding/admin` when no admin account exists yet
+- `/` — Redirects to `/home`
 - `/home` — Home (Activities feed)
 - `/school` — School page with 3 tabs: Kids (DB-backed children list), Parents (auto-derived read-only from each child's guardians), Teachers (DB-backed). Tab persisted via `?tab=` query param; top tab bar has a search magnifier that filters the active list by name.
 - `/school/add` — Add a new child
@@ -58,34 +58,28 @@ A childcare/daycare activity tracking React app with a warm, playful design insp
 - `PATCH /api/activities/:id/time` — Update activity time
 - `DELETE /api/activities/:id` — Delete activity (cascades comments/likes)
 - `GET /api/comments/:activityId` — List comments for an activity
-- `POST /api/comments` — Add a comment (activityId, text, time, role)
+- `POST /api/comments` — Add a comment (activityId, text, time, deviceId)
 - `PATCH /api/comments/:id` — Edit a comment
 - `DELETE /api/comments/:id` — Delete a comment
-- `GET /api/likes/:activityId` — List likes for an activity
-- `POST /api/likes/toggle` — Toggle like for an activity (activityId, role)
+- `GET /api/likes/:activityId?deviceId=...` — List likes for an activity; each entry has `mine: boolean` instead of a raw account id
+- `POST /api/likes/toggle` — Toggle like for an activity (activityId, deviceId)
 - `POST /api/summarize-day` — AI day summary generation
 - `GET /api/teachers` — List all teachers
 - `POST /api/teachers` — Create a teacher (Zod validated via `insertTeacherSchema`)
-- `GET /api/cron/cleanup` — Scheduled cleanup of expired invitations/password resets; invoked by Vercel Cron (`vercel.json`), gated by `CRON_SECRET` in production
 
 ## Security
 
-- Session auth (scrypt-hashed passwords, timing-safe compare); roles enforced server-side on every route
-- Parent isolation: parents only see/access their own children (404 on foreign data), enforced on every API request
-- Rate limits: login, admin register, forgot/reset password, invitation accept (20/15min per IP); AI endpoints rate-limited + concurrency-capped. Buckets are in-memory (`Map`), so limits are per-instance, not shared across concurrent Vercel invocations
-- `POST /api/admin/register` gated in production by `ADMIN_SETUP_TOKEN` (constant-time compare; token passed via onboarding link `?setup=...`); route also closed once an admin exists
-- `SESSION_SECRET` required in production (server refuses to start without it)
-- **Portfolio mode is on by default in this repo copy** (`PORTFOLIO_MODE !== "false"`): every visitor is auto-authenticated as admin server-side (`server/app.ts`) and `/api/admin/status` always reports `exists: true`, so `/` skips onboarding/login and lands straight on `/home`. This build has no real child/family data. The underlying login/onboarding/session code is untouched — set `PORTFOLIO_MODE=false` to restore real auth if this codebase is ever reused for an actual daycare client.
-- Admin onboarding credentials held in memory only (`client/src/lib/onboardingCredentials.ts`), never in sessionStorage
-- Email HTML variables escaped (`escapeHtml` in `server/email.ts`); PII masked in server logs
+- There is no login, onboarding, or session system — every visitor gets full, unauthenticated access to the app. This is intentional: the app is single-tenant (one daycare) and has no parent/teacher/admin role distinction.
+- Comment/like "authorship" uses a client-generated anonymous per-device UUID (`getDeviceId()`, `client/src/lib/deviceId.ts`, persisted in `localStorage`) sent as `deviceId` — used only to show "mine" like-state and comment attribution, never for access control.
+- AI endpoints (`/api/generate-activity-image`, `/api/summarize-day`) are rate-limited + concurrency-capped. Buckets are in-memory (`Map`), so limits are per-instance, not shared across concurrent Vercel invocations
 - Security headers: nosniff, Referrer-Policy, Permissions-Policy (X-Frame-Options intentionally omitted — a carryover from Replit's iframe-embedded preview; worth reconsidering now that the app is deployed standalone)
 
 ## Real-Time Sync
 
 - Client-side polling every 5s — no persistent connection, since Vercel's serverless functions can't hold long-lived SSE streams or in-memory client lists
 - Client hook: `client/src/lib/useRealtimeSync.ts` — invalidates all React Query caches on each tick; skips the tick while the tab is hidden and invalidates immediately on regaining focus (`document.visibilitychange`)
-- Both teacher and parent devices poll the same deployed backend
-- Trade-off: a poll tick carries no per-event metadata, so the previous cross-device toasts (e.g. "A parent left a comment...") are gone — devices just refetch and re-render silently
+- All devices poll the same deployed backend
+- Trade-off: a poll tick carries no per-event metadata, so there are no cross-device toasts (e.g. "Someone left a comment...") — devices just refetch and re-render silently
 
 ## Responsive Layout
 

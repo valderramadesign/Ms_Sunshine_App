@@ -1,5 +1,4 @@
 import { useLocation } from "wouter";
-import { useAuth } from "@/lib/auth";
 
 type PageHeaderProps = {
   title: string;
@@ -29,9 +28,7 @@ export default function PageHeader({
   disableHeaderNav,
 }: PageHeaderProps) {
   const [, setLocation] = useLocation();
-  const { role } = useAuth();
-  const isParent = role === "parent";
-  const navDisabled = disableHeaderNav || isParent;
+  const navDisabled = disableHeaderNav;
 
   const handleBack = () => {
     if (onBack) onBack();

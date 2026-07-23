@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useActivity } from "@/lib/activityStore";
 import { useSchoolLogo } from "@/lib/useSchoolLogo";
-import { useAuth } from "@/lib/auth";
+import { getDeviceId } from "@/lib/deviceId";
 
 
 import editIcon from "@assets/edit-icon-new.png";
@@ -269,7 +269,6 @@ function EditTimeOverlay({
 
 function SummaryDialog({
   dateLabel,
-  isParent,
   summaryLoading,
   summaryText,
   setSummaryText,
@@ -278,7 +277,6 @@ function SummaryDialog({
   glassCard,
 }: {
   dateLabel: string;
-  isParent: boolean;
   summaryLoading: boolean;
   summaryText: string;
   setSummaryText: (v: string) => void;
@@ -331,13 +329,6 @@ function SummaryDialog({
           <div className="flex items-center justify-center py-[36px]">
             <div className="w-[24px] h-[24px] border-[3px] border-[#e0d9cc] border-t-[#1b5c68] rounded-full animate-spin" />
           </div>
-        ) : isParent ? (
-          <div
-            className="w-full rounded-[10px] border border-solid border-[#d9d9d9] p-[12px] [font-family:'SF_Pro_Rounded-Semibold','M_PLUS_Rounded_1c',Helvetica] font-normal text-[#41444b] text-[15px] leading-[21px] whitespace-pre-wrap overflow-y-auto flex-1 min-h-0"
-            style={{ minHeight: 120 }}
-          >
-            {summaryText}
-          </div>
         ) : (
           <textarea
             data-testid="input-summary-text"
@@ -348,35 +339,22 @@ function SummaryDialog({
           />
         )}
         <div className="flex gap-[12px] justify-end flex-shrink-0">
-          {isParent ? (
-            <button
-              data-testid="btn-close-summary"
-              className="px-[20px] py-[10px] rounded-[10px] border-none cursor-pointer [font-family:'SF_Pro_Rounded-Semibold','M_PLUS_Rounded_1c',Helvetica] font-semibold text-white text-[15px]"
-              style={{ background: "linear-gradient(135deg, #5CD1E6 0%, #42ACBF 50%, #288899 100%)" }}
-              onClick={onClose}
-            >
-              Close
-            </button>
-          ) : (
-            <>
-              <button
-                data-testid="btn-cancel-summary"
-                className="px-[20px] py-[10px] rounded-[10px] border border-solid border-[#d9d9d9] bg-white cursor-pointer [font-family:'SF_Pro_Rounded-Semibold','M_PLUS_Rounded_1c',Helvetica] font-normal text-[#41444b] text-[15px]"
-                onClick={onClose}
-              >
-                Cancel
-              </button>
-              <button
-                data-testid="btn-save-summary"
-                className="px-[20px] py-[10px] rounded-[10px] border-none cursor-pointer [font-family:'SF_Pro_Rounded-Semibold','M_PLUS_Rounded_1c',Helvetica] font-semibold text-white text-[15px]"
-                style={{ background: "linear-gradient(135deg, #5CD1E6 0%, #42ACBF 50%, #288899 100%)" }}
-                onClick={onSave}
-                disabled={summaryLoading}
-              >
-                Save
-              </button>
-            </>
-          )}
+          <button
+            data-testid="btn-cancel-summary"
+            className="px-[20px] py-[10px] rounded-[10px] border border-solid border-[#d9d9d9] bg-white cursor-pointer [font-family:'SF_Pro_Rounded-Semibold','M_PLUS_Rounded_1c',Helvetica] font-normal text-[#41444b] text-[15px]"
+            onClick={onClose}
+          >
+            Cancel
+          </button>
+          <button
+            data-testid="btn-save-summary"
+            className="px-[20px] py-[10px] rounded-[10px] border-none cursor-pointer [font-family:'SF_Pro_Rounded-Semibold','M_PLUS_Rounded_1c',Helvetica] font-semibold text-white text-[15px]"
+            style={{ background: "linear-gradient(135deg, #5CD1E6 0%, #42ACBF 50%, #288899 100%)" }}
+            onClick={onSave}
+            disabled={summaryLoading}
+          >
+            Save
+          </button>
         </div>
       </div>
     </div>
@@ -451,7 +429,7 @@ export const ChildFeed = (): JSX.Element => {
   const [, setLocation] = useLocation();
   const logoSrc = useSchoolLogo();
   const params = useParams<{ childId: string }>();
-  const { role } = useAuth();
+  const deviceId = useRef(getDeviceId()).current;
 
   const { data: childData } = useQuery<{ firstName: string; lastName: string; photo: string } | null>({
     queryKey: ["/api/children", params.childId],
@@ -460,7 +438,6 @@ export const ChildFeed = (): JSX.Element => {
   const child = childData
     ? { firstName: childData.firstName, photo: childData.photo || "" }
     : { firstName: "", photo: "" };
-  const isParent = role === "parent";
   const { setPreSelectedChild } = useActivity();
 
   const { data: dbActivities } = useQuery<{ id: string; text: string; time: string; note: string; photo: string; createdAt: string }[]>({
@@ -485,14 +462,13 @@ export const ChildFeed = (): JSX.Element => {
     staleTime: 0,
   });
 
-  const currentRole = isParent ? "parent" : "teacher";
   const { data: dbLikesRaw } = useQuery<Record<string, boolean>>({
     queryKey: ["/api/likes-bulk", params.childId],
     queryFn: async () => {
       if (activityIds.length === 0) return {};
       const results: Record<string, boolean> = {};
       await Promise.all(activityIds.map(async (aid) => {
-        const res = await fetch(`/api/likes/${aid}`);
+        const res = await fetch(`/api/likes/${aid}?deviceId=${encodeURIComponent(deviceId)}`);
         if (res.ok) {
           const likes: { mine: boolean }[] = await res.json();
           results[aid] = likes.some((l) => l.mine);
@@ -688,12 +664,11 @@ export const ChildFeed = (): JSX.Element => {
     const mins = now.getMinutes().toString().padStart(2, "0");
     const ampm = hours >= 12 ? "PM" : "AM";
     const timeStr = `${hours % 12 || 12}:${mins} ${ampm}`;
-    const role = isParent ? "parent" : "teacher";
 
     if (id.startsWith("db-")) {
       const dbId = id.replace("db-", "");
       try {
-        await apiRequest("POST", "/api/comments", { activityId: dbId, text: commentText.trim(), time: timeStr, role });
+        await apiRequest("POST", "/api/comments", { activityId: dbId, text: commentText.trim(), time: timeStr, deviceId });
         queryClient.invalidateQueries({ queryKey: ["/api/comments-bulk", params.childId] });
       } catch (err) {
         console.error("Failed to save comment:", err);
@@ -822,7 +797,6 @@ export const ChildFeed = (): JSX.Element => {
       {summaryDialog && (
         <SummaryDialog
           dateLabel={summaryDialog.dateLabel}
-          isParent={isParent}
           summaryLoading={summaryLoading}
           summaryText={summaryText}
           setSummaryText={setSummaryText}
@@ -901,43 +875,39 @@ export const ChildFeed = (): JSX.Element => {
         />
         <div className="flex w-full items-baseline justify-between px-[24px] mt-[18px] mb-[8px]">
           <div className="flex items-baseline gap-[12px]">
-            {!isParent && (
-              <button
-                data-testid="button-back"
-                onClick={() => setLocation("/school")}
-                className="flex items-center justify-center w-[40px] h-[40px] rounded-full bg-white border-none cursor-pointer p-0 flex-shrink-0 shadow-[0px_1px_3px_rgba(0,0,0,0.08)] self-center"
-              >
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <path d="M9 15L4 10L9 5" stroke="#41444B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <line x1="4" y1="10" x2="16" y2="10" stroke="#41444B" strokeWidth="2" strokeLinecap="round"/>
-                </svg>
-              </button>
-            )}
+            <button
+              data-testid="button-back"
+              onClick={() => setLocation("/school")}
+              className="flex items-center justify-center w-[40px] h-[40px] rounded-full bg-white border-none cursor-pointer p-0 flex-shrink-0 shadow-[0px_1px_3px_rgba(0,0,0,0.08)] self-center"
+            >
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M9 15L4 10L9 5" stroke="#41444B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <line x1="4" y1="10" x2="16" y2="10" stroke="#41444B" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </button>
             <span
               data-testid="text-page-title"
-              className={`[font-family:'SF_Pro_Rounded-Semibold','M_PLUS_Rounded_1c',Helvetica] font-semibold text-[32px] tracking-[-0.50px] leading-[normal] whitespace-nowrap text-[#7a3428]${!isParent ? " cursor-pointer" : ""}`}
-              onClick={!isParent ? () => setLocation(`/school/${params.childId}/details`) : undefined}
+              className="[font-family:'SF_Pro_Rounded-Semibold','M_PLUS_Rounded_1c',Helvetica] font-semibold text-[32px] tracking-[-0.50px] leading-[normal] whitespace-nowrap text-[#7a3428] cursor-pointer"
+              onClick={() => setLocation(`/school/${params.childId}/details`)}
             >
               {child.firstName}
             </span>
           </div>
-          {!isParent && (
-            <button
-              data-testid="button-add-to-feed"
-              onClick={() => {
-                setPreSelectedChild(params.childId, child.firstName || "Child");
-                setLocation("/home");
-              }}
-              className="bg-transparent border-none cursor-pointer p-0"
-            >
-              <span className="[font-family:'SF_Pro_Rounded-Semibold','M_PLUS_Rounded_1c',Helvetica] font-semibold text-[#3e983a] text-[16px] leading-[18px] whitespace-nowrap">
-                + add to feed
-              </span>
-            </button>
-          )}
+          <button
+            data-testid="button-add-to-feed"
+            onClick={() => {
+              setPreSelectedChild(params.childId, child.firstName || "Child");
+              setLocation("/home");
+            }}
+            className="bg-transparent border-none cursor-pointer p-0"
+          >
+            <span className="[font-family:'SF_Pro_Rounded-Semibold','M_PLUS_Rounded_1c',Helvetica] font-semibold text-[#3e983a] text-[16px] leading-[18px] whitespace-nowrap">
+              + add to feed
+            </span>
+          </button>
         </div>
       </div>
-      <div className="flex flex-col gap-[19px] items-start w-full px-[24px] mt-[36px] flex-1 overflow-y-auto pb-[26px]">
+      <div className="flex flex-col gap-[19px] items-start w-full px-[24px] mt-[22px] flex-1 overflow-y-auto pb-[26px]">
         {feed.map((entry, idx) => {
           const isCheckout = /check(ed)?\s*out/i.test(entry.text);
           const showDayDivider = isCheckout;
@@ -960,14 +930,14 @@ export const ChildFeed = (): JSX.Element => {
             style={{
               padding: entry.type === "text" ? "8px 16px" : "16px",
             }}
-            onMouseDown={isParent ? undefined : () => startLongPress(entry.id)}
-            onMouseUp={isParent ? undefined : cancelLongPress}
-            onMouseLeave={isParent ? undefined : cancelLongPress}
-            onTouchStart={isParent ? undefined : () => startLongPress(entry.id)}
-            onTouchEnd={isParent ? undefined : cancelLongPress}
-            onTouchCancel={isParent ? undefined : cancelLongPress}
+            onMouseDown={() => startLongPress(entry.id)}
+            onMouseUp={cancelLongPress}
+            onMouseLeave={cancelLongPress}
+            onTouchStart={() => startLongPress(entry.id)}
+            onTouchEnd={cancelLongPress}
+            onTouchCancel={cancelLongPress}
           >
-            {!isParent && longPressedId === entry.id && (
+            {longPressedId === entry.id && (
               <button
                 data-testid={`btn-delete-card-${entry.id}`}
                 className="absolute top-[8px] right-[8px] z-10 flex items-center justify-center cursor-pointer bg-[#117182] rounded-full border-none"
@@ -1030,7 +1000,6 @@ export const ChildFeed = (): JSX.Element => {
               </p>
               <Controls
                 entry={entry}
-                hideEdit={isParent}
                 onEditText={() => setEditingId(entry.id)}
                 onEditTime={() => setEditingTimeId(entry.id)}
                 onAddImage={() => handleAddImage(entry.id)}
@@ -1043,7 +1012,7 @@ export const ChildFeed = (): JSX.Element => {
                   if (entry.id.startsWith("db-")) {
                     const dbId = entry.id.replace("db-", "");
                     try {
-                      await apiRequest("POST", "/api/likes/toggle", { activityId: dbId });
+                      await apiRequest("POST", "/api/likes/toggle", { activityId: dbId, deviceId });
                       queryClient.invalidateQueries({ queryKey: ["/api/likes-bulk", params.childId] });
                     } catch (err) {
                       console.error("Failed to toggle like:", err);
@@ -1110,7 +1079,7 @@ export const ChildFeed = (): JSX.Element => {
                           {c.time}
                         </p>
                       </div>
-                      {isTapped && !isParent && (
+                      {isTapped && (
                         <div className="flex gap-[6px] items-center flex-shrink-0 self-center">
                           <button
                             data-testid={`btn-edit-comment-${c.id}`}

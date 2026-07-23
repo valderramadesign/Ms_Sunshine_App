@@ -60,7 +60,6 @@ function PolaroidUpload({
 export const TeacherDetails = (): JSX.Element => {
   const [, setLocation] = useLocation();
   const params = useParams<{ teacherId: string }>();
-  const isOwner = params.teacherId === "owner";
   const logoSrc = useSchoolLogo();
   const isMobile = useIsMobile();
   const { bottom, keyboardOpen } = useKeyboardToolbarPosition();
@@ -171,7 +170,7 @@ export const TeacherDetails = (): JSX.Element => {
       </div>
 
       {/* Scrollable content */}
-      <div className={`flex-1 overflow-y-auto w-full flex flex-col items-start ${isMobile ? "pb-[70px]" : isOwner ? "pb-[122px]" : "pb-[160px]"} gap-[28px] pt-[16px]`}>
+      <div className={`flex-1 overflow-y-auto w-full flex flex-col items-start ${isMobile ? "pb-[70px]" : "pb-[160px]"} gap-[28px] pt-[16px]`}>
         <div className="flex items-center gap-[24px] w-full px-[24px]">
           <PolaroidUpload photo={photo} onSelect={(f) => readFileAsDataURL(f, setPhoto)}
             testId="btn-upload-photo" className="ml-[-1px] mt-[18px]"
@@ -194,29 +193,25 @@ export const TeacherDetails = (): JSX.Element => {
       {isMobile ? (
         <div className="fixed left-0 right-0 z-50 flex items-center justify-between px-[16px] bg-[#f0efe9] border-t border-[#d9d3c7]"
           style={{ bottom, height: 44, transition: keyboardOpen ? "bottom 0.1s ease-out" : "none" }}>
-          {isOwner ? <span /> : (
-            <button data-testid="btn-remove-form"
-              className={`bg-transparent border-none cursor-pointer ${FONT} text-[#DC2626] text-[16px] font-semibold leading-[normal] py-[8px] px-[12px]`}
-              onClick={() => setShowConfirm(true)}>remove</button>
-          )}
+          <button data-testid="btn-remove-form"
+            className={`bg-transparent border-none cursor-pointer ${FONT} text-[#DC2626] text-[16px] font-semibold leading-[normal] py-[8px] px-[12px]`}
+            onClick={() => setShowConfirm(true)}>remove</button>
           <button data-testid="btn-submit-form"
             className={`border-none cursor-pointer rounded-[100px] px-[20px] py-[8px] ${FONT} text-white text-[16px] font-semibold leading-[normal]`}
             style={{ background: "linear-gradient(135deg, #5CD1E6 0%, #42ACBF 50%, #288899 100%)" }}
             onClick={handleSave} disabled={saveMutation.isPending}>{ctaLabel}</button>
         </div>
       ) : (
-        <div className={`absolute bottom-0 left-0 right-0 ${isOwner ? "h-[96px]" : "h-[134px]"} z-10 pointer-events-auto`}>
-          <BottomCTA height={isOwner ? 96 : 134}>
+        <div className="absolute bottom-0 left-0 right-0 h-[134px] z-10 pointer-events-auto">
+          <BottomCTA height={134}>
             <button data-testid="btn-submit-form"
               className="w-full h-[44px] rounded-[50px] flex items-center justify-center cursor-pointer bg-white border border-[#f0f0f0] shadow-[0px_0px_4px_0px_rgba(0,0,0,0.06)]"
               onClick={handleSave} disabled={saveMutation.isPending}>
               <span className={`${FONT} text-[#3e983a] text-[24px] font-semibold leading-[normal]`}>{ctaLabel}</span>
             </button>
-            {!isOwner && (
-              <button data-testid="btn-remove-form"
-                className={`bg-transparent border-none cursor-pointer ${FONT} text-[#DC2626] text-[21px] font-semibold leading-[normal]`}
-                onClick={() => setShowConfirm(true)}>remove</button>
-            )}
+            <button data-testid="btn-remove-form"
+              className={`bg-transparent border-none cursor-pointer ${FONT} text-[#DC2626] text-[21px] font-semibold leading-[normal]`}
+              onClick={() => setShowConfirm(true)}>remove</button>
           </BottomCTA>
         </div>
       )}

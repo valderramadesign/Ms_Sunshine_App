@@ -1,7 +1,4 @@
 import express, { type Express, type Request, Response, NextFunction } from "express";
-import session from "express-session";
-import connectPgSimple from "connect-pg-simple";
-import { pool } from "./db";
 import { registerRoutes } from "./routes";
 
 declare module "http" {
@@ -46,15 +43,6 @@ async function buildApp(): Promise<Express> {
 
   app.use(express.urlencoded({ extended: false }));
 
-  if (!process.env.SESSION_SECRET) {
-    if (process.env.NODE_ENV === "production") {
-      // Never run production with a predictable session secret — sessions could be forged.
-      console.error("[security] SESSION_SECRET is required in production. Refusing to start.");
-      process.exit(1);
-    }
-    console.warn("[security] SESSION_SECRET is not set — using an insecure fallback (development only).");
-  }
-
   app.set("trust proxy", 1);
 
   // Baseline security headers on every response. X-Frame-Options is intentionally
@@ -65,40 +53,6 @@ async function buildApp(): Promise<Express> {
     res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
     next();
   });
-
-  const PgSession = connectPgSimple(session);
-
-  app.use(
-    session({
-      store: new PgSession({
-        pool,
-        tableName: "session",
-        createTableIfMissing: true,
-      }),
-      secret: process.env.SESSION_SECRET || "dev-only-insecure-fallback",
-      resave: false,
-      saveUninitialized: false,
-      cookie: {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        maxAge: 24 * 60 * 60 * 1000,
-      },
-    })
-  );
-
-  if (process.env.PORTFOLIO_MODE !== "false") {
-    // This build is a public portfolio demo: every visitor is auto-authenticated
-    // as admin so the app opens straight into the activity feed with no
-    // login/onboarding wall. On by default; set PORTFOLIO_MODE=false to restore
-    // real login if this codebase is ever reused for an actual daycare client.
-    app.use((req, _res, next) => {
-      req.session.authenticated = true;
-      req.session.role = "admin";
-      req.session.email = "demo@portfolio.local";
-      next();
-    });
-  }
 
   app.use((req, res, next) => {
     const start = Date.now();

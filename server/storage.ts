@@ -1,32 +1,8 @@
-import { type Child, type InsertChild, type Activity, type InsertActivity, type FeedComment, type InsertFeedComment, type FeedLike, type AdminAccount, type Teacher, type InsertTeacher, type Account, type Invitation, type PasswordReset, children, activities, feedComments, feedLikes, adminAccount, teachers, accounts, invitations, passwordResets } from "@shared/schema";
+import { type Child, type InsertChild, type Activity, type InsertActivity, type FeedComment, type InsertFeedComment, type FeedLike, type Teacher, type InsertTeacher, children, activities, feedComments, feedLikes, teachers } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and, isNull, isNotNull, lt, or } from "drizzle-orm";
-import { scryptSync, randomBytes, timingSafeEqual } from "crypto";
-
-export function hashPassword(password: string): string {
-  const salt = randomBytes(16).toString("hex");
-  const hash = scryptSync(password, salt, 64).toString("hex");
-  return `${salt}:${hash}`;
-}
-
-export function verifyPassword(password: string, stored: string): boolean {
-  const [salt, hash] = stored.split(":");
-  const hashBuf = Buffer.from(hash, "hex");
-  const derivedBuf = scryptSync(password, salt, 64);
-  return timingSafeEqual(hashBuf, derivedBuf);
-}
+import { eq, desc, and } from "drizzle-orm";
 
 export interface IStorage {
-  getAdminAccount(): Promise<AdminAccount | undefined>;
-  createAdminAccount(data: {
-    email: string; passwordHash: string; passwordHint: string;
-    fullName: string; role: string; schoolName: string;
-    schoolNumber: string; schoolAddress: string; logoPath: string; photo?: string;
-  }): Promise<AdminAccount>;
-  updateAdminAccount(data: Partial<{
-    email: string; fullName: string; role: string;
-    schoolNumber: string; schoolAddress: string; logoPath: string; photo: string;
-  }>): Promise<AdminAccount | undefined>;
   getAllChildren(): Promise<Child[]>;
   getChild(id: string): Promise<Child | undefined>;
   upsertChild(child: InsertChild): Promise<Child>;
@@ -51,47 +27,9 @@ export interface IStorage {
   createTeacher(teacher: InsertTeacher): Promise<Teacher>;
   updateTeacher(id: string, data: InsertTeacher): Promise<Teacher>;
   deleteTeacher(id: string): Promise<void>;
-  getAccountByEmail(email: string): Promise<Account | undefined>;
-  createAccount(data: { email: string; passwordHash: string; role: string }): Promise<Account>;
-  createInvitation(data: { token: string; email: string; role: string; invitedByName: string; expiresAt: Date }): Promise<Invitation>;
-  getInvitationByToken(token: string): Promise<Invitation | undefined>;
-  getPendingInvitation(email: string, role: string): Promise<Invitation | undefined>;
-  markInvitationAccepted(id: string): Promise<void>;
-  getParentChildIds(email: string): Promise<string[]>;
-  createPasswordReset(data: { token: string; email: string; expiresAt: Date }): Promise<PasswordReset>;
-  getPasswordResetByToken(token: string): Promise<PasswordReset | undefined>;
-  markPasswordResetUsed(id: string): Promise<void>;
-  deleteExpiredInvitations(): Promise<void>;
-  deleteExpiredPasswordResets(): Promise<void>;
-  updateAccountPassword(email: string, passwordHash: string): Promise<void>;
-  updateAdminPassword(email: string, passwordHash: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
-  async getAdminAccount(): Promise<AdminAccount | undefined> {
-    const [result] = await db.select().from(adminAccount).limit(1);
-    return result;
-  }
-
-  async createAdminAccount(data: {
-    email: string; passwordHash: string; passwordHint: string;
-    fullName: string; role: string; schoolName: string;
-    schoolNumber: string; schoolAddress: string; logoPath: string; photo?: string;
-  }): Promise<AdminAccount> {
-    const [result] = await db.insert(adminAccount).values(data).returning();
-    return result;
-  }
-
-  async updateAdminAccount(data: Partial<{
-    email: string; fullName: string; role: string;
-    schoolNumber: string; schoolAddress: string; logoPath: string; photo: string;
-  }>): Promise<AdminAccount | undefined> {
-    const existing = await this.getAdminAccount();
-    if (!existing) return undefined;
-    const [result] = await db.update(adminAccount).set(data).where(eq(adminAccount.id, existing.id)).returning();
-    return result;
-  }
-
   async getAllChildren(): Promise<Child[]> {
     return await db.select().from(children);
   }
@@ -281,97 +219,6 @@ export class DatabaseStorage implements IStorage {
   async updateTeacher(id: string, data: InsertTeacher): Promise<Teacher> {
     const [result] = await db.update(teachers).set(data).where(eq(teachers.id, id)).returning();
     return result;
-  }
-
-  async getAccountByEmail(email: string): Promise<Account | undefined> {
-    const [result] = await db.select().from(accounts).where(eq(accounts.email, email.trim().toLowerCase()));
-    return result;
-  }
-
-  async createAccount(data: { email: string; passwordHash: string; role: string }): Promise<Account> {
-    const [result] = await db
-      .insert(accounts)
-      .values({ ...data, email: data.email.trim().toLowerCase() })
-      .returning();
-    return result;
-  }
-
-  async createInvitation(data: { token: string; email: string; role: string; invitedByName: string; expiresAt: Date }): Promise<Invitation> {
-    const [result] = await db
-      .insert(invitations)
-      .values({ ...data, email: data.email.trim().toLowerCase() })
-      .returning();
-    return result;
-  }
-
-  async getInvitationByToken(token: string): Promise<Invitation | undefined> {
-    const [result] = await db.select().from(invitations).where(eq(invitations.token, token));
-    return result;
-  }
-
-  async getPendingInvitation(email: string, role: string): Promise<Invitation | undefined> {
-    const [result] = await db
-      .select()
-      .from(invitations)
-      .where(and(eq(invitations.email, email.trim().toLowerCase()), eq(invitations.role, role), isNull(invitations.acceptedAt)));
-    return result;
-  }
-
-  async markInvitationAccepted(id: string): Promise<void> {
-    await db.update(invitations).set({ acceptedAt: new Date() }).where(eq(invitations.id, id));
-  }
-
-  async createPasswordReset(data: { token: string; email: string; expiresAt: Date }): Promise<PasswordReset> {
-    const [result] = await db
-      .insert(passwordResets)
-      .values({ ...data, email: data.email.trim().toLowerCase() })
-      .returning();
-    return result;
-  }
-
-  async getPasswordResetByToken(token: string): Promise<PasswordReset | undefined> {
-    const [result] = await db.select().from(passwordResets).where(eq(passwordResets.token, token));
-    return result;
-  }
-
-  async markPasswordResetUsed(id: string): Promise<void> {
-    await db.update(passwordResets).set({ usedAt: new Date() }).where(eq(passwordResets.id, id));
-  }
-
-  async deleteExpiredInvitations(): Promise<void> {
-    await db.delete(invitations).where(
-      or(isNotNull(invitations.acceptedAt), lt(invitations.expiresAt, new Date()))
-    );
-  }
-
-  async deleteExpiredPasswordResets(): Promise<void> {
-    await db.delete(passwordResets).where(
-      or(isNotNull(passwordResets.usedAt), lt(passwordResets.expiresAt, new Date()))
-    );
-  }
-
-  async updateAccountPassword(email: string, passwordHash: string): Promise<void> {
-    await db.update(accounts).set({ passwordHash }).where(eq(accounts.email, email.trim().toLowerCase()));
-  }
-
-  async updateAdminPassword(email: string, passwordHash: string): Promise<void> {
-    await db.update(adminAccount).set({ passwordHash }).where(eq(adminAccount.email, email.trim().toLowerCase()));
-  }
-
-  async getParentChildIds(email: string): Promise<string[]> {
-    const target = email.trim().toLowerCase();
-    if (!target) return [];
-    const all = await db.select().from(children);
-    const ids: string[] = [];
-    for (const c of all) {
-      let gs: { email?: string }[] = [];
-      try { gs = JSON.parse(c.guardians || "[]"); } catch { gs = []; }
-      if (!Array.isArray(gs)) continue;
-      if (gs.some((g) => (g.email || "").trim().toLowerCase() === target)) {
-        ids.push(c.id);
-      }
-    }
-    return ids;
   }
 }
 
