@@ -1,0 +1,190 @@
+{
+  "children": [
+    {
+      "id": "c01", "firstName": "Mei", "lastName": "Chen", "birthday": "04/12/2023",
+      "enrollmentDate": "09/02/2025", "graduationDate": "06/14/2028",
+      "allergies": "", "medications": "", "doctor": "Dr. Karen Wu", "doctorPhone": "(415) 555-0182",
+      "note": "Loves drawing and story time. Naps best with her stuffed panda.",
+      "prompt": "Adorable happy 3-year-old East Asian Chinese toddler girl with chubby cheeks and a big genuine joyful smile, little pigtails, wearing a cute pastel casual kids top, wholesome and cute, candid natural portrait photograph, soft natural daylight, plain soft neutral background, sharp focus, photorealistic",
+      "guardians": [
+        { "id": "c01-m", "firstName": "Lin", "lastName": "Chen", "relation": "mother", "phoneNumber": "(415) 555-0143", "email": "lin.chen@gmail.com", "address": "218 Juniper Lane, San Mateo, CA 94402",
+          "prompt": "Attractive good-looking East Asian Chinese woman in her early 30s, warm friendly natural smile, wearing a casual soft dusty-rose sweater, relaxed and approachable, well-groomed, candid natural portrait photograph, soft natural daylight, plain soft neutral background, sharp focus, photorealistic" },
+        { "id": "c01-f", "firstName": "David", "lastName": "Chen", "relation": "father", "phoneNumber": "(415) 555-0144", "email": "david.chen@gmail.com", "address": "218 Juniper Lane, San Mateo, CA 94402",
+          "prompt": "Attractive good-looking East Asian Chinese man in his early 30s, warm friendly natural smile, wearing a casual heather-grey t-shirt, relaxed and approachable, well-groomed, candid natural portrait photograph, soft natural daylight, plain soft neutral background, sharp focus, photorealistic" }
+      ]
+    },
+    {
+      "id": "c02", "firstName": "Arjun", "lastName": "Patel", "birthday": "06/20/2022",
+      "enrollmentDate": "09/02/2025", "graduationDate": "06/13/2027",
+      "allergies": "Peanuts", "medications": "", "doctor": "Dr. Neha Rao", "doctorPhone": "(408) 555-0193",
+      "note": "Carries an EpiPen in his cubby. Very into toy trains and puzzles.",
+      "prompt": "Adorable happy 4-year-old South Asian Indian toddler boy with chubby cheeks and a big genuine joyful smile, tidy dark hair, wearing a cute casual bright kids polo, wholesome and cute, candid natural portrait photograph, soft natural daylight, plain soft neutral background, sharp focus, photorealistic",
+      "guardians": [
+        { "id": "c02-m", "firstName": "Priya", "lastName": "Patel", "relation": "mother", "phoneNumber": "(408) 555-0151", "email": "priya.patel@gmail.com", "address": "77 Magnolia Court, Sunnyvale, CA 94086",
+          "prompt": "Attractive good-looking South Asian Indian woman in her early 30s, warm friendly natural smile, long dark hair, wearing a casual soft teal blouse, relaxed and approachable, well-groomed, candid natural portrait photograph, soft natural daylight, plain soft neutral background, sharp focus, photorealistic" },
+        { "id": "c02-f", "firstName": "Rohan", "lastName": "Patel", "relation": "father", "phoneNumber": "(408) 555-0152", "email": "rohan.patel@gmail.com", "address": "77 Magnolia Court, Sunnyvale, CA 94086",
+          "prompt": "Attractive good-looking South Asian Indian man in his mid 30s, warm friendly natural smile, short dark hair and light stubble, wearing a casual navy henley shirt, relaxed and approachable, well-groomed, candid natural portrait photograph, soft natural daylight, plain soft neutral background, sharp focus, photorealistic" }
+      ]
+    },
+    {
+      "id": "c03", "firstName": "Zoe", "lastName": "Williams", "birthday": "03/05/2021",
+      "enrollmentDate": "09/03/2024", "graduationDate": "06/11/2026",
+      "allergies": "", "medications": "", "doctor": "Dr. Marcus Lee", "doctorPhone": "(510) 555-0170",
+      "note": "A confident big helper in the classroom. Loves dancing and music.",
+      "prompt": "Adorable happy 5-year-old African American Black girl with chubby cheeks and a big genuine joyful smile, cute hair in puffs with colorful beads, wearing a cheerful casual kids top, wholesome and cute, candid natural portrait photograph, soft natural daylight, plain soft neutral background, sharp focus, photorealistic",
+      "guardians": [
+        { "id": "c03-m", "firstName": "Jasmine", "lastName": "Williams", "relation": "mother", "phoneNumber": "(510) 555-0161", "email": "jasmine.williams@gmail.com", "address": "1440 Oakwood Ave, Oakland, CA 94602",
+          "prompt": "Attractive good-looking African American Black woman in her early 30s, warm radiant natural smile, stylish natural hair, wearing a casual mustard-yellow sweater, relaxed and approachable, well-groomed, candid natural portrait photograph, soft natural daylight, plain soft neutral background, sharp focus, photorealistic" },
+        { "id": "c03-f", "firstName": "Marcus", "lastName": "Williams", "relation": "father", "phoneNumber": "(510) 555-0162", "email": "marcus.williams@gmail.com", "address": "1440 Oakwood Ave, Oakland, CA 94602",
+          "prompt": "Attractive good-looking African American Black man in his mid 30s, warm friendly natural smile, short fade haircut and neat beard, wearing a casual olive-green crewneck t-shirt, relaxed and approachable, well-groomed, candid natural portrait photograph, soft natural daylight, plain soft neutral background, sharp focus, photorealistic" }
+      ]
+    },
+    {
+      "id": "c04", "firstName": "Liam", "lastName": "O'Connor", "birthday": "05/18/2024",
+      "enrollmentDate": "01/13/2026", "graduationDate": "06/15/2029",
+      "allergies": "", "medications": "", "doctor": "Dr. Karen Wu", "doctorPhone": "(415) 555-0182",
+      "note": "Just moved up from the infant room. Loves stacking blocks.",
+      "prompt": "Adorable happy 2-year-old white Irish toddler boy with rosy chubby cheeks, soft reddish-blond curls, and a big genuine joyful smile, wearing a cute casual striped kids shirt, wholesome and cute, candid natural portrait photograph, soft natural daylight, plain soft neutral background, sharp focus, photorealistic",
+      "guardians": [
+        { "id": "c04-m", "firstName": "Erin", "lastName": "O'Connor", "relation": "mother", "phoneNumber": "(415) 555-0171", "email": "erin.oconnor@gmail.com", "address": "305 Birch Street, San Francisco, CA 94114",
+          "prompt": "Attractive good-looking white Irish woman in her late 20s, warm friendly natural smile, wavy auburn hair and light freckles, wearing a casual cream cable-knit sweater, relaxed and approachable, well-groomed, candid natural portrait photograph, soft natural daylight, plain soft neutral background, sharp focus, photorealistic" },
+        { "id": "c04-f", "firstName": "Sean", "lastName": "O'Connor", "relation": "father", "phoneNumber": "(415) 555-0172", "email": "sean.oconnor@gmail.com", "address": "305 Birch Street, San Francisco, CA 94114",
+          "prompt": "Attractive good-looking white Irish man in his early 30s, warm friendly natural smile, light-brown hair and short stubble, wearing a casual blue flannel shirt, relaxed and approachable, well-groomed, candid natural portrait photograph, soft natural daylight, plain soft neutral background, sharp focus, photorealistic" }
+      ]
+    },
+    {
+      "id": "c05", "firstName": "Sofia", "lastName": "Ramirez", "birthday": "03/22/2022",
+      "enrollmentDate": "09/02/2025", "graduationDate": "06/13/2027",
+      "allergies": "Dairy", "medications": "", "doctor": "Dr. Ana Delgado", "doctorPhone": "(669) 555-0114",
+      "note": "Bilingual at home (Spanish/English). Loves painting and butterflies.",
+      "prompt": "Adorable happy 4-year-old Hispanic Latina toddler girl with chubby cheeks and a big genuine joyful smile, wavy dark-brown hair with a little bow, wearing a cute casual floral kids top, wholesome and cute, candid natural portrait photograph, soft natural daylight, plain soft neutral background, sharp focus, photorealistic",
+      "guardians": [
+        { "id": "c05-m", "firstName": "Carmen", "lastName": "Ramirez", "relation": "mother", "phoneNumber": "(669) 555-0101", "email": "carmen.ramirez@gmail.com", "address": "928 Cypress Way, San Jose, CA 95126",
+          "prompt": "Attractive good-looking Hispanic Latina woman in her early 30s, warm friendly natural smile, long dark wavy hair, wearing a casual soft coral blouse, relaxed and approachable, well-groomed, candid natural portrait photograph, soft natural daylight, plain soft neutral background, sharp focus, photorealistic" },
+        { "id": "c05-f", "firstName": "Luis", "lastName": "Ramirez", "relation": "father", "phoneNumber": "(669) 555-0102", "email": "luis.ramirez@gmail.com", "address": "928 Cypress Way, San Jose, CA 95126",
+          "prompt": "Attractive good-looking Hispanic Latino man in his mid 30s, warm friendly natural smile, dark hair and neat short beard, wearing a casual maroon t-shirt, relaxed and approachable, well-groomed, candid natural portrait photograph, soft natural daylight, plain soft neutral background, sharp focus, photorealistic" }
+      ]
+    },
+    {
+      "id": "c06", "firstName": "Noah", "lastName": "Kim", "birthday": "01/15/2021",
+      "enrollmentDate": "09/03/2024", "graduationDate": "06/11/2026",
+      "allergies": "", "medications": "", "doctor": "Dr. Grace Han", "doctorPhone": "(408) 555-0128",
+      "note": "The class builder — obsessed with LEGO and big towers. Kind to littler kids.",
+      "prompt": "Adorable happy 5-year-old Korean boy with chubby cheeks and a big genuine joyful smile, neat dark bowl-cut hair, wearing a cute casual green kids hoodie, wholesome and cute, candid natural portrait photograph, soft natural daylight, plain soft neutral background, sharp focus, photorealistic",
+      "guardians": [
+        { "id": "c06-m", "firstName": "Soyeon", "lastName": "Kim", "relation": "mother", "phoneNumber": "(408) 555-0121", "email": "soyeon.kim@gmail.com", "address": "62 Willow Glen Dr, San Jose, CA 95125",
+          "prompt": "Attractive good-looking Korean woman in her early 30s, warm friendly natural smile, sleek shoulder-length dark hair, wearing a casual soft lavender sweater, relaxed and approachable, well-groomed, candid natural portrait photograph, soft natural daylight, plain soft neutral background, sharp focus, photorealistic" },
+        { "id": "c06-f", "firstName": "Minjun", "lastName": "Kim", "relation": "father", "phoneNumber": "(408) 555-0122", "email": "minjun.kim@gmail.com", "address": "62 Willow Glen Dr, San Jose, CA 95125",
+          "prompt": "Attractive good-looking Korean man in his mid 30s, warm friendly natural smile, neat dark hair, wearing a casual charcoal crewneck t-shirt, relaxed and approachable, well-groomed, candid natural portrait photograph, soft natural daylight, plain soft neutral background, sharp focus, photorealistic" }
+      ]
+    },
+    {
+      "id": "c07", "firstName": "Layla", "lastName": "Haddad", "birthday": "02/14/2023",
+      "enrollmentDate": "09/02/2025", "graduationDate": "06/14/2028",
+      "allergies": "", "medications": "", "doctor": "Dr. Omar Nasser", "doctorPhone": "(650) 555-0139",
+      "note": "Gentle and curious. Loves singing and helping water the classroom plants.",
+      "prompt": "Adorable happy 3-year-old Middle Eastern Lebanese toddler girl with chubby cheeks and a big genuine joyful smile, dark curly hair, big brown eyes, wearing a cute casual purple kids top, wholesome and cute, candid natural portrait photograph, soft natural daylight, plain soft neutral background, sharp focus, photorealistic",
+      "guardians": [
+        { "id": "c07-m", "firstName": "Nadia", "lastName": "Haddad", "relation": "mother", "phoneNumber": "(650) 555-0131", "email": "nadia.haddad@gmail.com", "address": "14 Sycamore Terrace, Redwood City, CA 94061",
+          "prompt": "Attractive good-looking Middle Eastern Lebanese woman in her early 30s, warm friendly natural smile, long dark wavy hair, wearing a casual soft emerald-green blouse, relaxed and approachable, well-groomed, candid natural portrait photograph, soft natural daylight, plain soft neutral background, sharp focus, photorealistic" },
+        { "id": "c07-f", "firstName": "Sami", "lastName": "Haddad", "relation": "father", "phoneNumber": "(650) 555-0132", "email": "sami.haddad@gmail.com", "address": "14 Sycamore Terrace, Redwood City, CA 94061",
+          "prompt": "Attractive good-looking Middle Eastern Lebanese man in his mid 30s, warm friendly natural smile, dark hair and short well-kept beard, wearing a casual light-blue t-shirt, relaxed and approachable, well-groomed, candid natural portrait photograph, soft natural daylight, plain soft neutral background, sharp focus, photorealistic" }
+      ]
+    },
+    {
+      "id": "c08", "firstName": "Gabriel", "lastName": "Santos", "birthday": "05/09/2021",
+      "enrollmentDate": "09/03/2024", "graduationDate": "06/11/2026",
+      "allergies": "", "medications": "", "doctor": "Dr. Ana Delgado", "doctorPhone": "(669) 555-0114",
+      "note": "Full of energy — loves soccer at outdoor play. Speaks Portuguese at home.",
+      "prompt": "Adorable happy 5-year-old Brazilian Latino boy with chubby cheeks and a big genuine joyful smile, wavy dark hair, wearing a cute casual yellow kids soccer t-shirt, wholesome and cute, candid natural portrait photograph, soft natural daylight, plain soft neutral background, sharp focus, photorealistic",
+      "guardians": [
+        { "id": "c08-m", "firstName": "Beatriz", "lastName": "Santos", "relation": "mother", "phoneNumber": "(669) 555-0111", "email": "beatriz.santos@gmail.com", "address": "501 Palm Grove Ln, Santa Clara, CA 95050",
+          "prompt": "Attractive good-looking Brazilian Latina woman in her early 30s, warm friendly natural smile, long wavy brown hair, wearing a casual soft white t-shirt, relaxed and approachable, well-groomed, candid natural portrait photograph, soft natural daylight, plain soft neutral background, sharp focus, photorealistic" },
+        { "id": "c08-f", "firstName": "Rafael", "lastName": "Santos", "relation": "father", "phoneNumber": "(669) 555-0112", "email": "rafael.santos@gmail.com", "address": "501 Palm Grove Ln, Santa Clara, CA 95050",
+          "prompt": "Attractive good-looking Brazilian Latino man in his mid 30s, warm friendly natural smile, short dark hair and light stubble, wearing a casual green polo shirt, relaxed and approachable, well-groomed, candid natural portrait photograph, soft natural daylight, plain soft neutral background, sharp focus, photorealistic" }
+      ]
+    },
+    {
+      "id": "c09", "firstName": "Ava", "lastName": "Johnson", "birthday": "02/14/2022",
+      "enrollmentDate": "09/02/2025", "graduationDate": "06/13/2027",
+      "allergies": "", "medications": "", "doctor": "Dr. Grace Han", "doctorPhone": "(408) 555-0128",
+      "note": "Creative and observant. Loves picture books and building sandcastles.",
+      "prompt": "Adorable happy 4-year-old mixed-race girl with African American and Japanese heritage, warm light-brown skin, chubby cheeks, curly dark hair, and a big genuine joyful smile, wearing a cute casual pink kids top, wholesome and cute, candid natural portrait photograph, soft natural daylight, plain soft neutral background, sharp focus, photorealistic",
+      "guardians": [
+        { "id": "c09-m", "firstName": "Yuki", "lastName": "Nakamura", "relation": "mother", "phoneNumber": "(408) 555-0135", "email": "yuki.nakamura@gmail.com", "address": "89 Maple Crossing, Cupertino, CA 95014",
+          "prompt": "Attractive good-looking Japanese woman in her early 30s, warm friendly natural smile, straight shoulder-length dark hair, wearing a casual soft blush-pink sweater, relaxed and approachable, well-groomed, candid natural portrait photograph, soft natural daylight, plain soft neutral background, sharp focus, photorealistic" },
+        { "id": "c09-f", "firstName": "Andre", "lastName": "Johnson", "relation": "father", "phoneNumber": "(408) 555-0136", "email": "andre.johnson@gmail.com", "address": "89 Maple Crossing, Cupertino, CA 95014",
+          "prompt": "Attractive good-looking African American Black man in his mid 30s, warm friendly natural smile, short haircut and neat beard, wearing a casual grey henley shirt, relaxed and approachable, well-groomed, candid natural portrait photograph, soft natural daylight, plain soft neutral background, sharp focus, photorealistic" }
+      ]
+    },
+    {
+      "id": "c10", "firstName": "Isla", "lastName": "Anderson", "birthday": "08/25/2025",
+      "enrollmentDate": "02/02/2026", "graduationDate": "06/15/2030",
+      "allergies": "", "medications": "", "doctor": "Dr. Karen Wu", "doctorPhone": "(415) 555-0182",
+      "note": "Infant room. Bottle-fed every 3 hours; loves peekaboo and soft rattles.",
+      "prompt": "Adorable happy 11-month-old white baby girl with rosy chubby cheeks, wispy light-blond hair, big bright eyes and a joyful gummy smile, wearing a cute pastel-yellow baby onesie, wholesome and cute, candid natural portrait photograph, soft natural daylight, plain soft neutral background, sharp focus, photorealistic",
+      "guardians": [
+        { "id": "c10-m", "firstName": "Chloe", "lastName": "Anderson", "relation": "mother", "phoneNumber": "(415) 555-0181", "email": "chloe.anderson@gmail.com", "address": "712 Larkspur Ave, San Francisco, CA 94118",
+          "prompt": "Attractive good-looking white woman in her late 20s, warm friendly natural smile, blonde hair in a relaxed style, wearing a casual soft sage-green sweater, relaxed and approachable, well-groomed, candid natural portrait photograph, soft natural daylight, plain soft neutral background, sharp focus, photorealistic" },
+        { "id": "c10-f", "firstName": "Jack", "lastName": "Anderson", "relation": "father", "phoneNumber": "(415) 555-0183", "email": "jack.anderson@gmail.com", "address": "712 Larkspur Ave, San Francisco, CA 94118",
+          "prompt": "Attractive good-looking white man in his early 30s, warm friendly natural smile, short brown hair and light stubble, wearing a casual navy t-shirt, relaxed and approachable, well-groomed, candid natural portrait photograph, soft natural daylight, plain soft neutral background, sharp focus, photorealistic" }
+      ]
+    },
+    {
+      "id": "c11", "firstName": "Mateo", "lastName": "Flores", "birthday": "01/12/2025",
+      "enrollmentDate": "09/02/2025", "graduationDate": "06/15/2030",
+      "allergies": "", "medications": "", "doctor": "Dr. Ana Delgado", "doctorPhone": "(669) 555-0114",
+      "note": "Just starting to walk! Loves music and shaking maracas at circle time.",
+      "prompt": "Adorable happy 18-month-old Hispanic Latino baby boy with chubby cheeks, dark hair, big brown eyes and a joyful smile, wearing a cute casual red-striped baby romper, wholesome and cute, candid natural portrait photograph, soft natural daylight, plain soft neutral background, sharp focus, photorealistic",
+      "guardians": [
+        { "id": "c11-m", "firstName": "Valentina", "lastName": "Flores", "relation": "mother", "phoneNumber": "(669) 555-0141", "email": "valentina.flores@gmail.com", "address": "233 Alameda St, San Jose, CA 95110",
+          "prompt": "Attractive good-looking Hispanic Latina woman in her late 20s, warm friendly natural smile, long dark hair, wearing a casual soft terracotta blouse, relaxed and approachable, well-groomed, candid natural portrait photograph, soft natural daylight, plain soft neutral background, sharp focus, photorealistic" },
+        { "id": "c11-f", "firstName": "Diego", "lastName": "Flores", "relation": "father", "phoneNumber": "(669) 555-0142", "email": "diego.flores@gmail.com", "address": "233 Alameda St, San Jose, CA 95110",
+          "prompt": "Attractive good-looking Hispanic Latino man in his early 30s, warm friendly natural smile, dark hair and short beard, wearing a casual denim shirt, relaxed and approachable, well-groomed, candid natural portrait photograph, soft natural daylight, plain soft neutral background, sharp focus, photorealistic" }
+      ]
+    },
+    {
+      "id": "c12", "firstName": "Aria", "lastName": "Bennett", "birthday": "11/15/2025",
+      "enrollmentDate": "03/02/2026", "graduationDate": "06/15/2031",
+      "allergies": "", "medications": "", "doctor": "Dr. Neha Rao", "doctorPhone": "(408) 555-0193",
+      "note": "Infant room. Loves tummy time on the play mat and soft cloth books.",
+      "prompt": "Adorable happy 8-month-old mixed-race baby girl with South Asian Indian and white heritage, warm light-tan skin, dark wispy hair, big bright eyes and a joyful gummy smile, wearing a cute pastel-mint baby onesie, wholesome and cute, candid natural portrait photograph, soft natural daylight, plain soft neutral background, sharp focus, photorealistic",
+      "guardians": [
+        { "id": "c12-m", "firstName": "Anjali", "lastName": "Sharma", "relation": "mother", "phoneNumber": "(408) 555-0191", "email": "anjali.sharma@gmail.com", "address": "156 Foothill Blvd, Mountain View, CA 94040",
+          "prompt": "Attractive good-looking South Asian Indian woman in her early 30s, warm friendly natural smile, long dark hair, wearing a casual soft plum blouse, relaxed and approachable, well-groomed, candid natural portrait photograph, soft natural daylight, plain soft neutral background, sharp focus, photorealistic" },
+        { "id": "c12-f", "firstName": "James", "lastName": "Bennett", "relation": "father", "phoneNumber": "(408) 555-0192", "email": "james.bennett@gmail.com", "address": "156 Foothill Blvd, Mountain View, CA 94040",
+          "prompt": "Attractive good-looking white man in his early 30s, warm friendly natural smile, light-brown hair and short stubble, wearing a casual grey-green t-shirt, relaxed and approachable, well-groomed, candid natural portrait photograph, soft natural daylight, plain soft neutral background, sharp focus, photorealistic" }
+      ]
+    },
+    {
+      "id": "c13", "firstName": "Ethan", "lastName": "Okafor", "birthday": "02/20/2026",
+      "enrollmentDate": "06/01/2026", "graduationDate": "06/15/2031",
+      "allergies": "", "medications": "", "doctor": "Dr. Marcus Lee", "doctorPhone": "(510) 555-0170",
+      "note": "Our youngest! Bottle-fed on schedule; soothed by gentle rocking and lullabies.",
+      "prompt": "Adorable happy 5-month-old Nigerian Black baby boy with round chubby cheeks, big bright eyes and a joyful gummy smile, wearing a cute pastel-blue baby onesie, wholesome and cute, candid natural portrait photograph, soft natural daylight, plain soft neutral background, sharp focus, photorealistic",
+      "guardians": [
+        { "id": "c13-m", "firstName": "Amara", "lastName": "Okafor", "relation": "mother", "phoneNumber": "(510) 555-0151", "email": "amara.okafor@gmail.com", "address": "3390 Redwood Rd, Oakland, CA 94619",
+          "prompt": "Attractive good-looking Nigerian Black woman in her early 30s, warm radiant natural smile, elegant braided hair, wearing a casual soft rust-orange top, relaxed and approachable, well-groomed, candid natural portrait photograph, soft natural daylight, plain soft neutral background, sharp focus, photorealistic" },
+        { "id": "c13-f", "firstName": "Chidi", "lastName": "Okafor", "relation": "father", "phoneNumber": "(510) 555-0152", "email": "chidi.okafor@gmail.com", "address": "3390 Redwood Rd, Oakland, CA 94619",
+          "prompt": "Attractive good-looking Nigerian Black man in his mid 30s, warm friendly natural smile, short hair and neat beard, wearing a casual burgundy t-shirt, relaxed and approachable, well-groomed, candid natural portrait photograph, soft natural daylight, plain soft neutral background, sharp focus, photorealistic" }
+      ]
+    }
+  ],
+  "teachers": [
+    {
+      "id": "t01", "firstName": "Emma", "lastName": "Sullivan", "relation": "teacher",
+      "phone": "(415) 555-0201", "email": "emma.sullivan@mssunshine.com", "address": "12 Sunshine Way, San Mateo, CA 94401",
+      "prompt": "Beautiful young white woman in her early twenties, warm friendly approachable smile, wavy light-brown hair, wearing a casual soft cream cardigan, natural light makeup, kind and cheerful, candid natural portrait photograph, soft natural daylight, plain soft neutral background, sharp focus, photorealistic"
+    },
+    {
+      "id": "t02", "firstName": "Aaliyah", "lastName": "Robinson", "relation": "teacher",
+      "phone": "(415) 555-0202", "email": "aaliyah.robinson@mssunshine.com", "address": "12 Sunshine Way, San Mateo, CA 94401",
+      "prompt": "Beautiful young African American Black woman in her mid twenties, warm radiant approachable smile, stylish natural curly hair, wearing a casual soft teal blouse, natural light makeup, kind and cheerful, candid natural portrait photograph, soft natural daylight, plain soft neutral background, sharp focus, photorealistic"
+    },
+    {
+      "id": "t03", "firstName": "Camila", "lastName": "Torres", "relation": "teacher",
+      "phone": "(415) 555-0203", "email": "camila.torres@mssunshine.com", "address": "12 Sunshine Way, San Mateo, CA 94401",
+      "prompt": "Beautiful young Hispanic Latina woman in her early twenties, warm friendly approachable smile, long dark wavy hair, wearing a casual soft coral sweater, natural light makeup, kind and cheerful, candid natural portrait photograph, soft natural daylight, plain soft neutral background, sharp focus, photorealistic"
+    }
+  ]
+}

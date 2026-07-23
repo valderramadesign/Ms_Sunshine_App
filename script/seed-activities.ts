@@ -3,17 +3,20 @@
 // checkout day-summary modal has content to summarize.
 // Run: npx tsx --env-file=.env script/seed-activities.ts
 import { readFileSync } from "fs";
+import path from "path";
 import { db, pool } from "../server/db";
 import { activities } from "@shared/schema";
 import { eq } from "drizzle-orm";
 
-const SCRATCH =
-  "/private/tmp/claude-501/-Volumes-Tim-Documents-Development-Environment-ms-sunshine-app/5e769511-af24-4cce-8f28-31fedd7ac095/scratchpad";
+const DATA_DIR = path.join(import.meta.dirname, "data");
 
-const roster = JSON.parse(readFileSync(`${SCRATCH}/roster.json`, "utf8")) as {
+const roster = JSON.parse(readFileSync(path.join(DATA_DIR, "roster.json"), "utf8")) as {
   children: { id: string; firstName: string }[];
 };
-const manifest = JSON.parse(readFileSync(`${SCRATCH}/manifest.json`, "utf8")) as Record<string, string>;
+const manifest = JSON.parse(readFileSync(path.join(DATA_DIR, "portraits-manifest.json"), "utf8")) as Record<
+  string,
+  string
+>;
 
 const BABY_IDS = new Set(["c10", "c11", "c12", "c13"]);
 

@@ -3,14 +3,16 @@
 // contextual photo of the child actually doing that activity.
 // Run: npx tsx --env-file=.env script/update-activity-photos.ts
 import { readFileSync } from "fs";
+import path from "path";
 import { db, pool } from "../server/db";
 import { activities } from "@shared/schema";
 import { and, eq, like } from "drizzle-orm";
 
-const SCRATCH =
-  "/private/tmp/claude-501/-Volumes-Tim-Documents-Development-Environment-ms-sunshine-app/5e769511-af24-4cce-8f28-31fedd7ac095/scratchpad";
+const DATA_DIR = path.join(import.meta.dirname, "data");
 
-const manifest = JSON.parse(readFileSync(`${SCRATCH}/activity_manifest.json`, "utf8")) as Record<string, string>;
+const manifest = JSON.parse(
+  readFileSync(path.join(DATA_DIR, "activity-photos-manifest.json"), "utf8"),
+) as Record<string, string>;
 
 async function main() {
   let updated = 0;
