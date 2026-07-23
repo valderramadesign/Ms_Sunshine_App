@@ -87,6 +87,19 @@ async function buildApp(): Promise<Express> {
     })
   );
 
+  if (process.env.PORTFOLIO_MODE !== "false") {
+    // This build is a public portfolio demo: every visitor is auto-authenticated
+    // as admin so the app opens straight into the activity feed with no
+    // login/onboarding wall. On by default; set PORTFOLIO_MODE=false to restore
+    // real login if this codebase is ever reused for an actual daycare client.
+    app.use((req, _res, next) => {
+      req.session.authenticated = true;
+      req.session.role = "admin";
+      req.session.email = "demo@portfolio.local";
+      next();
+    });
+  }
+
   app.use((req, res, next) => {
     const start = Date.now();
     const path = req.path;

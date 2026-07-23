@@ -147,7 +147,11 @@ function App() {
           <TooltipProvider>
             <Toaster />
             <OfflineBanner />
-            <Router />
+            <div className="app-shell">
+              <div className="app-frame">
+                <Router />
+              </div>
+            </div>
           </TooltipProvider>
         </ActivityProvider>
       </RealtimeWrapper>

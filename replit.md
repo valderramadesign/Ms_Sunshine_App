@@ -75,6 +75,7 @@ A childcare/daycare activity tracking React app with a warm, playful design insp
 - Rate limits: login, admin register, forgot/reset password, invitation accept (20/15min per IP); AI endpoints rate-limited + concurrency-capped. Buckets are in-memory (`Map`), so limits are per-instance, not shared across concurrent Vercel invocations
 - `POST /api/admin/register` gated in production by `ADMIN_SETUP_TOKEN` (constant-time compare; token passed via onboarding link `?setup=...`); route also closed once an admin exists
 - `SESSION_SECRET` required in production (server refuses to start without it)
+- **Portfolio mode is on by default in this repo copy** (`PORTFOLIO_MODE !== "false"`): every visitor is auto-authenticated as admin server-side (`server/app.ts`) and `/api/admin/status` always reports `exists: true`, so `/` skips onboarding/login and lands straight on `/home`. This build has no real child/family data. The underlying login/onboarding/session code is untouched — set `PORTFOLIO_MODE=false` to restore real auth if this codebase is ever reused for an actual daycare client.
 - Admin onboarding credentials held in memory only (`client/src/lib/onboardingCredentials.ts`), never in sessionStorage
 - Email HTML variables escaped (`escapeHtml` in `server/email.ts`); PII masked in server logs
 - Security headers: nosniff, Referrer-Policy, Permissions-Policy (X-Frame-Options intentionally omitted — a carryover from Replit's iframe-embedded preview; worth reconsidering now that the app is deployed standalone)

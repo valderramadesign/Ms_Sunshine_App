@@ -897,6 +897,9 @@ export async function registerRoutes(app: Express): Promise<void> {
 
   // GET /api/admin/status — check if admin account exists
   app.get("/api/admin/status", async (_req: Request, res: Response) => {
+    if (process.env.PORTFOLIO_MODE !== "false") {
+      return res.json({ exists: true });
+    }
     const account = await storage.getAdminAccount();
     res.json({ exists: !!account });
   });

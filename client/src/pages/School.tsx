@@ -54,7 +54,7 @@ function PersonRow({
         className="absolute left-0 right-0 bottom-0 rounded-[15px] flex items-center bg-white border border-[#f0f0f0] border-solid shadow-[0px_0px_4px_0px_rgba(0,0,0,0.06)]"
         style={{ top: "18.07%" }}
       >
-        <div className="flex items-center justify-between w-full pl-[97px] pr-[16px]">
+        <div className="flex items-center justify-between w-full pl-[99px] pr-[16px]">
           <p className="[font-family:'SF_Pro_Rounded-Semibold','M_PLUS_Rounded_1c',Helvetica] font-semibold leading-[normal] shrink-0 text-[#41444b] text-[16px] truncate flex-1 min-w-0 -translate-y-[3px]">
             {name}
           </p>

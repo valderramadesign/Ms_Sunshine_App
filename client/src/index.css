@@ -212,3 +212,36 @@
   }
 }
 
+/* ---------------------------------------------------------------------------
+   Responsive app shell
+
+   The app is designed phone-first. On phones (< 768px) the shell and frame are
+   inert pass-throughs, so nothing about the mobile layout changes. On tablets
+   and desktops the app is capped to a phone-width column and centered over an
+   on-brand backdrop, instead of stretching the pixel-tuned mobile UI edge to
+   edge. The frame carries `transform` so the pages' `position: fixed` overlays
+   (dialogs, toasts) resolve against the column rather than the full viewport.
+--------------------------------------------------------------------------- */
+@media (min-width: 768px) {
+  .app-shell {
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    min-height: 100dvh;
+    background: #000000;
+  }
+
+  .app-frame {
+    position: relative;
+    width: 100%;
+    max-width: 460px;
+    min-height: 100dvh;
+    /* Establishes the containing block for descendant position:fixed overlays. */
+    transform: translateZ(0);
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.06),
+      0 24px 70px -20px rgba(0, 0, 0, 0.8),
+      0 8px 30px -14px rgba(0, 0, 0, 0.6);
+  }
+}
+
